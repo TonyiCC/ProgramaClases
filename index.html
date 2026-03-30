@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reserva de Espacios</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <img src="assets/logo.png" alt="Logo de la aplicación" class="logo" />
+        <div>
+          <h1>Reserva de Espacios</h1>
+          <p>Consulta disponibilidad y selecciona una franja horaria</p>
+        </div>
+      </div>
+      <button class="admin-btn" type="button">Panel</button>
+    </header>
+
+    <main class="layout">
+      <section class="calendar-panel card">
+        <div class="toolbar">
+          <div class="field-group">
+            <label for="siteSelect">Espacio</label>
+            <select id="siteSelect">
+              <option value="salon-actos">Salón de actos</option>
+              <option value="polideportivo">Polideportivo</option>
+              <option value="aula-multiusos">Aula multiusos</option>
+            </select>
+          </div>
+
+          <div class="month-nav">
+            <button id="prevMonth" type="button">◀</button>
+            <h2 id="monthTitle"></h2>
+            <button id="nextMonth" type="button">▶</button>
+          </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <span class="legend-color available"></span>
+                <span>Libre</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color partial"></span>
+                <span>Reserva parcial</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color reserved"></span>
+                <span>Reservado completo</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color disabled"></span>
+                <span>Festivo / fin de semana</span>
+            </div>
+        </div>
+
+        <div class="weekdays">
+          <div>Lun</div>
+          <div>Mar</div>
+          <div>Mié</div>
+          <div>Jue</div>
+          <div>Vie</div>
+          <div>Sáb</div>
+          <div>Dom</div>
+        </div>
+
+        <div id="calendarGrid" class="calendar-grid"></div>
+      </section>
+
+      <aside class="details-panel card">
+        <h3 id="detailsTitle">Selecciona un día</h3>
+        <p id="detailsSubtitle">Aquí aparecerán las franjas horarias disponibles.</p>
+
+        <div id="slotsContainer" class="slots"></div>
+
+        <div class="reservation-box">
+          <h4>Resumen</h4>
+          <p><strong>Espacio:</strong> <span id="summarySite">-</span></p>
+          <p><strong>Fecha:</strong> <span id="summaryDate">-</span></p>
+          <p><strong>Hora:</strong> <span id="summaryTime">-</span></p>
+          <button id="reserveBtn" class="reserve-btn" type="button" disabled>
+            Reservar
+          </button>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
