@@ -13,7 +13,7 @@ const summaryDate = document.getElementById("summaryDate");
 const summaryTime = document.getElementById("summaryTime");
 const reserveBtn = document.getElementById("reserveBtn");
 
-let currentDate = new Date(2026, 2, 1);
+let currentDate = new Date();
 let selectedDate = null;
 let selectedSlot = null;
 
@@ -36,11 +36,13 @@ const holidays = [
   "2026-12-25"
 ];
 
+// Déjalo vacío para que no salga nada reservado al empezar
 const reservations = {
-    "salon-actos": {},
-    "polideportivo": {},
-    "aula-multiusos": {}
-  };
+  "salon-actos": {},
+  "nave": {},
+  "polideportivo": {},
+  "aula-multiusos": {}
+};
 
 function formatDateToISO(date) {
   const year = date.getFullYear();
@@ -74,7 +76,7 @@ function getReservedSlots(site, isoDate) {
 function isFullyReserved(site, isoDate) {
   const reserved = getReservedSlots(site, isoDate);
   const allSlots = timeSlots.map(slot => slot.start);
-  return allSlots.every(slot => reserved.includes(slot));
+  return allSlots.length > 0 && allSlots.every(slot => reserved.includes(slot));
 }
 
 function isPartiallyReserved(site, isoDate) {
@@ -112,17 +114,22 @@ function renderCalendar() {
 
   const firstDay = new Date(year, month, 1);
   let startDay = firstDay.getDay();
-  startDay = startDay === 0 ? 6 : startDay - 1;
+  startDay = startDay === 0 ? 6 : startDay - 1; // lunes = 0
 
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const site = siteSelect.value;
 
+  let totalCells = 0;
+
+  // Huecos vacíos antes del día 1
   for (let i = 0; i < startDay; i++) {
     const emptyCell = document.createElement("div");
     emptyCell.className = "day empty";
     calendarGrid.appendChild(emptyCell);
+    totalCells++;
   }
 
+  // Días del mes
   for (let day = 1; day <= daysInMonth; day++) {
     const date = new Date(year, month, day);
     const isoDate = formatDateToISO(date);
@@ -168,6 +175,15 @@ function renderCalendar() {
     dayEl.appendChild(dayNumber);
     dayEl.appendChild(dayStatus);
     calendarGrid.appendChild(dayEl);
+    totalCells++;
+  }
+
+  // Rellenar siempre hasta 42 celdas (6 filas x 7 columnas)
+  while (totalCells < 42) {
+    const emptyCell = document.createElement("div");
+    emptyCell.className = "day empty";
+    calendarGrid.appendChild(emptyCell);
+    totalCells++;
   }
 }
 
@@ -239,13 +255,13 @@ function getSlotText(slot, reservedSlots) {
 }
 
 prevMonthBtn.addEventListener("click", () => {
-  currentDate.setMonth(currentDate.getMonth() - 1);
+  currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
   clearSelection();
   renderCalendar();
 });
 
 nextMonthBtn.addEventListener("click", () => {
-  currentDate.setMonth(currentDate.getMonth() + 1);
+  currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
   clearSelection();
   renderCalendar();
 });
