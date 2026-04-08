@@ -332,6 +332,20 @@
   .slot.busy {
     background: #fff5f5;
   }
+
+  .slot.busy.cancellable {
+    background: #fff7ed;
+  }
+  
+  .slot.busy.cancellable button {
+    background: #f59e0b;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .slot.busy.cancellable button:hover {
+    background: #dc2626;
+  }
   
   .slot.busy button,
   .slot.break button {

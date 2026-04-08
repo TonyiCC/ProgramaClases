@@ -17,6 +17,7 @@ let currentDate = new Date();
 let selectedDate = null;
 let selectedSlot = null;
 
+let currentUser = null;
 let holidays = [];
 let reservations = {};
 let isLoading = false;
@@ -72,8 +73,17 @@ function isHoliday(date) {
   return holidays.includes(formatDateToISO(date));
 }
 
-function getReservedSlots(site, isoDate) {
+function getReservationsForDay(site, isoDate) {
   return reservations[site]?.[isoDate] || [];
+}
+
+function getReservationForSlot(site, isoDate, slotStart) {
+  const dayReservations = getReservationsForDay(site, isoDate);
+  return dayReservations.find(r => r.slotStart === slotStart) || null;
+}
+
+function getReservedSlots(site, isoDate) {
+  return getReservationsForDay(site, isoDate).map(r => r.slotStart);
 }
 
 function isFullyReserved(site, isoDate) {
@@ -85,6 +95,11 @@ function isFullyReserved(site, isoDate) {
 function isPartiallyReserved(site, isoDate) {
   const reserved = getReservedSlots(site, isoDate);
   return reserved.length > 0 && !isFullyReserved(site, isoDate);
+}
+
+function canCancelReservation(reservation) {
+  if (!reservation || !currentUser) return false;
+  return currentUser.role === "admin" || currentUser.id === reservation.userId;
 }
 
 function clearSelection() {
@@ -114,10 +129,27 @@ function buildReservationsMap(rows) {
       map[currentSite][reservation.date] = [];
     }
 
-    map[currentSite][reservation.date].push(reservation.slotStart);
+    map[currentSite][reservation.date].push({
+      id: reservation.id,
+      userId: reservation.userId,
+      slotStart: reservation.slotStart,
+      slotEnd: reservation.slotEnd,
+      site: reservation.site
+    });
   });
 
   return map;
+}
+
+async function loadCurrentUser() {
+  const response = await fetch("/api/auth/me");
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Error al cargar el usuario");
+  }
+
+  currentUser = data.user;
 }
 
 async function loadHolidays() {
@@ -151,6 +183,8 @@ async function loadReservations() {
 async function loadCalendarData() {
   try {
     isLoading = true;
+
+    await loadCurrentUser();
 
     if (holidays.length === 0) {
       await loadHolidays();
@@ -272,6 +306,34 @@ function selectDay(date) {
   renderCalendar();
 }
 
+async function cancelReservation(reservationId) {
+  try {
+    const response = await fetch(`/api/reservations/${reservationId}`, {
+      method: "DELETE"
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || "No se pudo cancelar la reserva");
+      return;
+    }
+
+    alert("Reserva cancelada correctamente");
+
+    selectedSlot = null;
+    summaryTime.textContent = "-";
+    reserveBtn.disabled = true;
+
+    await loadReservations();
+    renderSlots();
+    renderCalendar();
+  } catch (error) {
+    console.error(error);
+    alert("Error al cancelar la reserva");
+  }
+}
+
 function renderSlots() {
   slotsContainer.innerHTML = "";
 
@@ -279,24 +341,49 @@ function renderSlots() {
 
   const site = siteSelect.value;
   const isoDate = formatDateToISO(selectedDate);
-  const reservedSlots = getReservedSlots(site, isoDate);
 
   timeSlots.forEach(slot => {
     const slotEl = document.createElement("div");
     slotEl.classList.add("slot");
 
+    const reservation = getReservationForSlot(site, isoDate, slot.start);
+    const isReserved = Boolean(reservation);
+
     const info = document.createElement("div");
     info.innerHTML = `
       <strong>${slot.label}</strong><br>
-      <span>${getSlotText(slot, reservedSlots)}</span>
+      <span>${getSlotText(slot, reservation)}</span>
     `;
 
     const button = document.createElement("button");
 
-    if (reservedSlots.includes(slot.start)) {
+    if (isReserved) {
+      const cancellable = canCancelReservation(reservation);
+
       slotEl.classList.add("busy");
-      button.textContent = "Ocupado";
-      button.disabled = true;
+
+      if (cancellable) {
+        slotEl.classList.add("cancellable");
+        button.textContent = "Ocupado";
+
+        slotEl.addEventListener("mouseenter", () => {
+          button.textContent = "Cancelar";
+        });
+
+        slotEl.addEventListener("mouseleave", () => {
+          button.textContent = "Ocupado";
+        });
+
+        button.addEventListener("click", async () => {
+          const confirmDelete = confirm("¿Quieres cancelar esta reserva?");
+          if (!confirmDelete) return;
+
+          await cancelReservation(reservation.id);
+        });
+      } else {
+        button.textContent = "Ocupado";
+        button.disabled = true;
+      }
     } else {
       slotEl.classList.add("free");
       button.textContent = "Seleccionar";
@@ -313,8 +400,12 @@ function renderSlots() {
   });
 }
 
-function getSlotText(slot, reservedSlots) {
-  if (reservedSlots.includes(slot.start)) {
+function getSlotText(slot, reservation) {
+  if (reservation) {
+    if (canCancelReservation(reservation)) {
+      return "Reservado por ti";
+    }
+
     return "Ya reservado";
   }
 

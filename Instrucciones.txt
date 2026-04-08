@@ -21,7 +21,7 @@ Pegar en la url http://localhost:3000/api/auth/register
 Pegar en el json (EJEMPLO):
     {
         "name": "Juan",
-        "email": "juan@correo.com",
+        "identifier": "juan@correo.com",
         "password": "123456"
     }
 send
@@ -36,7 +36,7 @@ Json
 Pegar en la url http://localhost:3000/api/auth/login
 Pegar en el json (Siguiendo el ejemplo anterior):
     {
-        "email": "juan@correo.com",
+        "identifier": "juan@correo.com",
         "password": "123456"
     }
 send
@@ -57,3 +57,18 @@ new request
 get
 http://localhost:3000/api/auth/me
 send
+
+
+ACTUALMENTE login pulsando F12 en la web y escribiendo en la consola 
+etch("/api/auth/login", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    identifier: "admin",
+    password: "admin"
+  })
+})
+  .then(res => res.json())
+  .then(data => console.log(data));

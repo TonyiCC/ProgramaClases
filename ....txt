@@ -1,0 +1,5 @@
+quitar todas las malditas confirmaciones en la web cuando intento 
+    reservar o cancelar la reserva
+
+auto recargar pagina tras iniciar sesion
+meter interfaz para el login

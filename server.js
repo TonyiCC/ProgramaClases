@@ -45,6 +45,26 @@ async function verifyPassword(password, storedPassword) {
   return crypto.timingSafeEqual(storedBuffer, derivedKey);
 }
 
+async function ensureAdminUser() {
+  const existingAdmin = await get(
+    `SELECT id FROM users WHERE LOWER(name) = 'admin' OR LOWER(email) = 'admin@local'`
+  );
+
+  if (existingAdmin) return;
+
+  const hashedPassword = await hashPassword("admin");
+
+  await run(
+    `
+    INSERT INTO users (name, email, password, role)
+    VALUES (?, ?, ?, ?)
+    `,
+    ["admin", "admin@local", hashedPassword, "admin"]
+  );
+
+  console.log("Usuario admin creado: usuario 'admin' / contraseña 'admin'");
+}
+
 function requireAuth(req, res, next) {
   if (!req.session.user) {
     return res.status(401).json({ message: "Debes iniciar sesión" });
@@ -127,23 +147,23 @@ app.post("/api/auth/register", async (req, res) => {
 
 app.post("/api/auth/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { identifier, email, password } = req.body || {};
 
-    if (!email || !password) {
+    const loginValue = (identifier || email || "").trim().toLowerCase();
+
+    if (!loginValue || !password) {
       return res.status(400).json({
-        message: "Email y contraseña son obligatorios"
+        message: "Usuario/email y contraseña son obligatorios"
       });
     }
-
-    const cleanEmail = email.trim().toLowerCase();
 
     const user = await get(
       `
       SELECT id, name, email, password, role
       FROM users
-      WHERE email = ?
+      WHERE LOWER(email) = ? OR LOWER(name) = ?
       `,
-      [cleanEmail]
+      [loginValue, loginValue]
     );
 
     if (!user) {
@@ -174,6 +194,35 @@ app.post("/api/auth/login", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error al iniciar sesión" });
+  }
+});
+
+app.get("/api/my-reservations", requireAuth, async (req, res) => {
+  try {
+    const rows = await all(
+      `
+      SELECT
+        r.id,
+        s.code AS site,
+        s.name AS siteName,
+        r.date,
+        r.slot_start AS slotStart,
+        r.slot_end AS slotEnd,
+        r.status,
+        r.notes
+      FROM reservations r
+      JOIN spaces s ON s.id = r.space_id
+      WHERE r.user_id = ?
+        AND r.status = 'active'
+      ORDER BY r.date, r.slot_start
+      `,
+      [req.session.user.id]
+    );
+
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al obtener tus reservas" });
   }
 });
 
@@ -302,6 +351,7 @@ app.get("/api/reservations", async (req, res) => {
     let sql = `
       SELECT
         r.id,
+        r.user_id AS userId,
         s.code AS site,
         s.name AS siteName,
         r.date,
@@ -336,7 +386,7 @@ app.get("/api/reservations", async (req, res) => {
   }
 });
 
-app.post("/api/reservations", async (req, res) => {
+app.post("/api/reservations", requireAuth, async (req, res) => {
   const { site, date, slotStart, notes = null } = req.body;
 
   try {
@@ -402,11 +452,11 @@ app.post("/api/reservations", async (req, res) => {
 
     const result = await run(
       `
-      INSERT INTO reservations (space_id, date, slot_start, slot_end, notes)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO reservations (user_id, space_id, date, slot_start, slot_end, notes)
+      VALUES (?, ?, ?, ?, ?, ?)
       `,
       [req.session.user.id, space.id, date, slotStart, slotEnd, notes]
-    );
+    );  
 
     const newReservation = await get(
       `
@@ -436,12 +486,23 @@ app.post("/api/reservations", async (req, res) => {
   }
 });
 
-app.delete("/api/reservations/:id", async (req, res) => {
+app.delete("/api/reservations/:id", requireAuth, async (req, res) => {
   try {
     const id = Number(req.params.id);
 
     const reservation = await get(
-      `SELECT id FROM reservations WHERE id = ?`,
+      `
+      SELECT
+        r.id,
+        r.user_id AS userId,
+        s.code AS site,
+        s.name AS siteName,
+        r.date,
+        r.slot_start AS slotStart
+      FROM reservations r
+      JOIN spaces s ON s.id = r.space_id
+      WHERE r.id = ?
+      `,
       [id]
     );
 
@@ -451,12 +512,21 @@ app.delete("/api/reservations/:id", async (req, res) => {
       });
     }
 
-    await run(
-      `DELETE FROM reservations WHERE id = ?`,
-      [id]
-    );
+    const isOwner = reservation.userId === req.session.user.id;
+    const isAdmin = req.session.user.role === "admin";
 
-    res.json({ message: "Reserva eliminada correctamente" });
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({
+        message: "No tienes permisos para eliminar esta reserva"
+      });
+    }
+
+    await run(`DELETE FROM reservations WHERE id = ?`, [id]);
+
+    res.json({
+      message: "Reserva eliminada correctamente",
+      reservation
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error al eliminar la reserva" });
@@ -464,9 +534,11 @@ app.delete("/api/reservations/:id", async (req, res) => {
 });
 
 initDatabase()
-  .then(() => {
+  .then(async () => {
+    await ensureAdminUser();
+
     app.listen(PORT, () => {
-      console.log(`Servidor iniciado en http://localhost:${PORT}`);
+      console.log(`Servidor iniciado en http://localhost:3000`);
     });
   })
   .catch((error) => {
