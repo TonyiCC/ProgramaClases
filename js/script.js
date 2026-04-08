@@ -17,6 +17,10 @@ let currentDate = new Date();
 let selectedDate = null;
 let selectedSlot = null;
 
+let holidays = [];
+let reservations = {};
+let isLoading = false;
+
 const timeSlots = [
   { start: "08:30", end: "09:30", label: "08:30 - 09:30" },
   { start: "09:30", end: "10:30", label: "09:30 - 10:30" },
@@ -27,28 +31,17 @@ const timeSlots = [
   { start: "14:00", end: "15:00", label: "14:00 - 15:00" }
 ];
 
-const holidays = [
-  "2026-01-01",
-  "2026-01-06",
-  "2026-05-01",
-  "2026-10-12",
-  "2026-12-08",
-  "2026-12-25"
-];
-
-// Déjalo vacío para que no salga nada reservado al empezar
-const reservations = {
-  "salon-actos": {},
-  "nave": {},
-  "polideportivo": {},
-  "aula-multiusos": {}
-};
-
 function formatDateToISO(date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+function formatMonthToISO(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
 }
 
 function isToday(date) {
@@ -106,8 +99,75 @@ function clearSelection() {
 }
 
 function updateSummarySite() {
-  const selectedOption = siteSelect.options[siteSelect.selectedIndex].text;
+  const selectedOption = siteSelect.options[siteSelect.selectedIndex]?.text || "-";
   summarySite.textContent = selectedOption;
+}
+
+function buildReservationsMap(rows) {
+  const map = {};
+  const currentSite = siteSelect.value;
+
+  map[currentSite] = {};
+
+  rows.forEach(reservation => {
+    if (!map[currentSite][reservation.date]) {
+      map[currentSite][reservation.date] = [];
+    }
+
+    map[currentSite][reservation.date].push(reservation.slotStart);
+  });
+
+  return map;
+}
+
+async function loadHolidays() {
+  const response = await fetch("/api/holidays");
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Error al cargar festivos");
+  }
+
+  holidays = data.map(item => item.date);
+}
+
+async function loadReservations() {
+  const site = siteSelect.value;
+  const month = formatMonthToISO(currentDate);
+
+  const response = await fetch(
+    `/api/reservations?site=${encodeURIComponent(site)}&month=${encodeURIComponent(month)}`
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Error al cargar reservas");
+  }
+
+  reservations = buildReservationsMap(data);
+}
+
+async function loadCalendarData() {
+  try {
+    isLoading = true;
+
+    if (holidays.length === 0) {
+      await loadHolidays();
+    }
+
+    await loadReservations();
+    renderCalendar();
+
+    if (selectedDate) {
+      renderSlots();
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Error al cargar los datos del calendario");
+  } finally {
+    isLoading = false;
+  }
 }
 
 function renderCalendar() {
@@ -124,14 +184,13 @@ function renderCalendar() {
 
   const firstDay = new Date(year, month, 1);
   let startDay = firstDay.getDay();
-  startDay = startDay === 0 ? 6 : startDay - 1; // lunes = 0
+  startDay = startDay === 0 ? 6 : startDay - 1;
 
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const site = siteSelect.value;
 
   let totalCells = 0;
 
-  // Huecos vacíos antes del día 1
   for (let i = 0; i < startDay; i++) {
     const emptyCell = document.createElement("div");
     emptyCell.className = "day empty";
@@ -139,7 +198,6 @@ function renderCalendar() {
     totalCells++;
   }
 
-  // Días del mes
   for (let day = 1; day <= daysInMonth; day++) {
     const date = new Date(year, month, day);
     const isoDate = formatDateToISO(date);
@@ -149,6 +207,7 @@ function renderCalendar() {
     if (isToday(date)) {
       dayEl.classList.add("today");
     }
+
     const dayNumber = document.createElement("div");
     dayNumber.className = "day-number";
     dayNumber.textContent = day;
@@ -172,7 +231,7 @@ function renderCalendar() {
       dayEl.addEventListener("click", () => selectDay(date));
     } else {
       dayEl.classList.add("available");
-      dayStatus.textContent = "Disponible";
+      dayStatus.textContent = isLoading ? "Cargando..." : "Disponible";
       dayEl.addEventListener("click", () => selectDay(date));
     }
 
@@ -191,7 +250,6 @@ function renderCalendar() {
     totalCells++;
   }
 
-  // Rellenar siempre hasta 42 celdas (6 filas x 7 columnas)
   while (totalCells < 42) {
     const emptyCell = document.createElement("div");
     emptyCell.className = "day empty";
@@ -267,21 +325,21 @@ function getSlotText(slot, reservedSlots) {
   return "Disponible";
 }
 
-prevMonthBtn.addEventListener("click", () => {
+prevMonthBtn.addEventListener("click", async () => {
   currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
   clearSelection();
-  renderCalendar();
+  await loadCalendarData();
 });
 
-nextMonthBtn.addEventListener("click", () => {
+nextMonthBtn.addEventListener("click", async () => {
   currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
   clearSelection();
-  renderCalendar();
+  await loadCalendarData();
 });
 
-siteSelect.addEventListener("change", () => {
+siteSelect.addEventListener("change", async () => {
   clearSelection();
-  renderCalendar();
+  await loadCalendarData();
 });
 
 reserveBtn.addEventListener("click", async () => {
@@ -318,21 +376,11 @@ reserveBtn.addEventListener("click", async () => {
 
     alert("Reserva creada correctamente");
 
-    // Guardar también en memoria local del front
-    if (!reservations[reservationData.site]) {
-      reservations[reservationData.site] = {};
-    }
-
-    if (!reservations[reservationData.site][reservationData.date]) {
-      reservations[reservationData.site][reservationData.date] = [];
-    }
-
-    reservations[reservationData.site][reservationData.date].push(reservationData.slotStart);
-
     selectedSlot = null;
     summaryTime.textContent = "-";
     reserveBtn.disabled = true;
 
+    await loadReservations();
     renderSlots();
     renderCalendar();
   } catch (error) {
@@ -340,5 +388,11 @@ reserveBtn.addEventListener("click", async () => {
     alert("No se pudo conectar con el backend");
   }
 });
-updateSummarySite();
-renderCalendar();
+
+async function initApp() {
+  updateSummarySite();
+  renderCalendar();
+  await loadCalendarData();
+}
+
+initApp();
