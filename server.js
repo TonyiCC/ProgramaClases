@@ -5,6 +5,9 @@ const { all, get, run, initDatabase } = require("./db");
 const app = express();
 const PORT = 3000;
 
+app.use(express.json());
+app.use(express.static(path.join(__dirname)));
+
 //---------------------INICIO SESION ------------------------//
 const session = require("express-session");
 const crypto = require("node:crypto");
@@ -226,8 +229,7 @@ app.get("/api/my-reservations", requireAuth, async (req, res) => {
 
 
 
-app.use(express.json());
-app.use(express.static(path.join(__dirname)));
+
 
 const timeSlots = [
   { start: "08:30", end: "09:30", label: "08:30 - 09:30" },

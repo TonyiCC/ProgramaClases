@@ -3,8 +3,57 @@ Intalar Node.js
 En la carpeta del archivo
 npm init -y
 npm install express
+npm install sqlite3
+npm install express-session
 npm start
 
 
-npm install sqlite3
-npm install express-session
+Instalar thunder client en extensiones VsCode
+
+--> Registros <--
+
+Para meter usuario,entrar en thunder client
+New Request
+Seleccionar POST (desplegable a la izquierda del url)
+Body
+Json 
+Pegar en la url http://localhost:3000/api/auth/register
+Pegar en el json (EJEMPLO):
+    {
+        "name": "Juan",
+        "email": "juan@correo.com",
+        "password": "123456"
+    }
+send
+
+--> Login <--
+
+Para loguear, entrar en thunder client
+new request 
+Seleccionar Post
+Body
+Json
+Pegar en la url http://localhost:3000/api/auth/login
+Pegar en el json (Siguiendo el ejemplo anterior):
+    {
+        "email": "juan@correo.com",
+        "password": "123456"
+    }
+send
+
+--> Log Out <--
+
+thunder client
+new request
+Post
+http://localhost:3000/api/auth/logout
+send
+(O INICIAR SESION CON OTRO USUARIO)
+
+--> Ver Usuario Logueado<--
+
+thunder client
+new request 
+get
+http://localhost:3000/api/auth/me
+send
