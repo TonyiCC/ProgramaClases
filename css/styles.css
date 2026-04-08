@@ -281,6 +281,10 @@
     outline: 3px solid var(--blue);
     outline-offset: 2px;
   }
+
+  .day.today {
+    box-shadow: inset 0 0 0 3px #2563eb;
+  }
   
   .details-panel h3 {
     margin-top: 0;

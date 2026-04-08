@@ -51,6 +51,16 @@ function formatDateToISO(date) {
   return `${year}-${month}-${day}`;
 }
 
+function isToday(date) {
+  const today = new Date();
+
+  return (
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear()
+  );
+}
+
 function formatDateToLong(date) {
   return date.toLocaleDateString("es-ES", {
     weekday: "long",
@@ -136,6 +146,9 @@ function renderCalendar() {
     const dayEl = document.createElement("div");
     dayEl.classList.add("day");
 
+    if (isToday(date)) {
+      dayEl.classList.add("today");
+    }
     const dayNumber = document.createElement("div");
     dayNumber.className = "day-number";
     dayNumber.textContent = day;
