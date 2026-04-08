@@ -3,3 +3,5 @@ Intalar Node.js
 En la carpeta del archivo
 npm init -y
 npm install express
+ npm start
+ 

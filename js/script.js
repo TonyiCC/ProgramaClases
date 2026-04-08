@@ -271,13 +271,61 @@ siteSelect.addEventListener("change", () => {
   renderCalendar();
 });
 
-reserveBtn.addEventListener("click", () => {
+reserveBtn.addEventListener("click", async () => {
   if (!selectedDate || !selectedSlot) return;
 
-  alert(
-    `Reserva visual preparada:\n\nEspacio: ${summarySite.textContent}\nFecha: ${summaryDate.textContent}\nHora: ${summaryTime.textContent}\n\nMás adelante esto se conectará al backend.`
-  );
-});
+  const slot = timeSlots.find(s => s.label === selectedSlot);
 
+  if (!slot) {
+    alert("No se ha encontrado la franja horaria seleccionada");
+    return;
+  }
+
+  const reservationData = {
+    site: siteSelect.value,
+    date: formatDateToISO(selectedDate),
+    slotStart: slot.start
+  };
+
+  try {
+    const response = await fetch("/api/reservations", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(reservationData)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || "Error al crear la reserva");
+      return;
+    }
+
+    alert("Reserva creada correctamente");
+
+    // Guardar también en memoria local del front
+    if (!reservations[reservationData.site]) {
+      reservations[reservationData.site] = {};
+    }
+
+    if (!reservations[reservationData.site][reservationData.date]) {
+      reservations[reservationData.site][reservationData.date] = [];
+    }
+
+    reservations[reservationData.site][reservationData.date].push(reservationData.slotStart);
+
+    selectedSlot = null;
+    summaryTime.textContent = "-";
+    reserveBtn.disabled = true;
+
+    renderSlots();
+    renderCalendar();
+  } catch (error) {
+    console.error(error);
+    alert("No se pudo conectar con el backend");
+  }
+});
 updateSummarySite();
 renderCalendar();
