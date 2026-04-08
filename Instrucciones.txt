@@ -60,7 +60,7 @@ send
 
 
 ACTUALMENTE login pulsando F12 en la web y escribiendo en la consola 
-etch("/api/auth/login", {
+fetch("/api/auth/login", {
   method: "POST",
   headers: {
     "Content-Type": "application/json"
