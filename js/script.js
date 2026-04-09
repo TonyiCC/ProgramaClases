@@ -8,14 +8,8 @@ const detailsTitle = document.getElementById("detailsTitle");
 const detailsSubtitle = document.getElementById("detailsSubtitle");
 const slotsContainer = document.getElementById("slotsContainer");
 
-const summarySite = document.getElementById("summarySite");
-const summaryDate = document.getElementById("summaryDate");
-const summaryTime = document.getElementById("summaryTime");
-const reserveBtn = document.getElementById("reserveBtn");
-
 let currentDate = new Date();
 let selectedDate = null;
-let selectedSlot = null;
 
 let currentUser = null;
 let holidays = [];
@@ -104,18 +98,9 @@ function canCancelReservation(reservation) {
 
 function clearSelection() {
   selectedDate = null;
-  selectedSlot = null;
-  summaryDate.textContent = "-";
-  summaryTime.textContent = "-";
-  reserveBtn.disabled = true;
   detailsTitle.textContent = "Selecciona un día";
   detailsSubtitle.textContent = "Aquí aparecerán las franjas horarias disponibles.";
   slotsContainer.innerHTML = "";
-}
-
-function updateSummarySite() {
-  const selectedOption = siteSelect.options[siteSelect.selectedIndex]?.text || "-";
-  summarySite.textContent = selectedOption;
 }
 
 function buildReservationsMap(rows) {
@@ -206,7 +191,6 @@ async function loadCalendarData() {
 
 function renderCalendar() {
   calendarGrid.innerHTML = "";
-  updateSummarySite();
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -294,16 +278,49 @@ function renderCalendar() {
 
 function selectDay(date) {
   selectedDate = date;
-  selectedSlot = null;
-  summaryDate.textContent = formatDateToLong(date);
-  summaryTime.textContent = "-";
-  reserveBtn.disabled = true;
 
   detailsTitle.textContent = "Horarios del día";
   detailsSubtitle.textContent = formatDateToLong(date);
 
   renderSlots();
   renderCalendar();
+}
+
+async function createReservation(slotStart) {
+  if (!selectedDate) return;
+
+  const reservationData = {
+    site: siteSelect.value,
+    date: formatDateToISO(selectedDate),
+    slotStart
+  };
+
+  try {
+    const response = await fetch("/api/reservations", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(reservationData)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || "Error al crear la reserva");
+      return;
+    }
+
+    alert("Reserva creada correctamente");
+
+    await loadCurrentUser();
+    await loadReservations();
+    renderSlots();
+    renderCalendar();
+  } catch (error) {
+    console.error(error);
+    alert("No se pudo conectar con el backend");
+  }
 }
 
 async function cancelReservation(reservationId) {
@@ -321,10 +338,7 @@ async function cancelReservation(reservationId) {
 
     alert("Reserva cancelada correctamente");
 
-    selectedSlot = null;
-    summaryTime.textContent = "-";
-    reserveBtn.disabled = true;
-
+    await loadCurrentUser();
     await loadReservations();
     renderSlots();
     renderCalendar();
@@ -386,11 +400,9 @@ function renderSlots() {
       }
     } else {
       slotEl.classList.add("free");
-      button.textContent = "Seleccionar";
-      button.addEventListener("click", () => {
-        selectedSlot = slot.label;
-        summaryTime.textContent = slot.label;
-        reserveBtn.disabled = false;
+      button.textContent = "Reservar";
+      button.addEventListener("click", async () => {
+        await createReservation(slot.start);
       });
     }
 
@@ -433,55 +445,7 @@ siteSelect.addEventListener("change", async () => {
   await loadCalendarData();
 });
 
-reserveBtn.addEventListener("click", async () => {
-  if (!selectedDate || !selectedSlot) return;
-
-  const slot = timeSlots.find(s => s.label === selectedSlot);
-
-  if (!slot) {
-    alert("No se ha encontrado la franja horaria seleccionada");
-    return;
-  }
-
-  const reservationData = {
-    site: siteSelect.value,
-    date: formatDateToISO(selectedDate),
-    slotStart: slot.start
-  };
-
-  try {
-    const response = await fetch("/api/reservations", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(reservationData)
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      alert(data.message || "Error al crear la reserva");
-      return;
-    }
-
-    alert("Reserva creada correctamente");
-
-    selectedSlot = null;
-    summaryTime.textContent = "-";
-    reserveBtn.disabled = true;
-
-    await loadReservations();
-    renderSlots();
-    renderCalendar();
-  } catch (error) {
-    console.error(error);
-    alert("No se pudo conectar con el backend");
-  }
-});
-
 async function initApp() {
-  updateSummarySite();
   renderCalendar();
   await loadCalendarData();
 }
