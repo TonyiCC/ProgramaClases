@@ -312,6 +312,12 @@
     gap: 12px;
   }
   
+  .slot span {
+    display: inline-block;
+    max-width: 100%;
+    word-break: break-word;
+  }
+
   .slot button {
     border: none;
     border-radius: 10px;

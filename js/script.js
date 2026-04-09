@@ -117,6 +117,8 @@ function buildReservationsMap(rows) {
     map[currentSite][reservation.date].push({
       id: reservation.id,
       userId: reservation.userId,
+      reservedByName: reservation.reservedByName,
+      reservedByEmail: reservation.reservedByEmail,
       slotStart: reservation.slotStart,
       slotEnd: reservation.slotEnd,
       site: reservation.site
@@ -412,13 +414,20 @@ function renderSlots() {
   });
 }
 
+function isOwnerReservation(reservation) {
+  if (!reservation || !currentUser) return false;
+  return currentUser.id === reservation.userId;
+}
+
 function getSlotText(slot, reservation) {
   if (reservation) {
-    if (canCancelReservation(reservation)) {
-      return "Reservado por ti";
+    const name = reservation.reservedByName || "otra persona";
+
+    if (isOwnerReservation(reservation)) {
+      return `Reservado por ${name} (tú)`;
     }
 
-    return "Ya reservado";
+    return `Reservado por ${name}`;
   }
 
   if (slot.start === "11:30") {

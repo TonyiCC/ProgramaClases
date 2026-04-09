@@ -352,6 +352,7 @@ app.get("/api/reservations", async (req, res) => {
       SELECT
         r.id,
         r.user_id AS userId,
+        u.name AS reservedByName,
         s.code AS site,
         s.name AS siteName,
         r.date,
@@ -361,6 +362,7 @@ app.get("/api/reservations", async (req, res) => {
         r.notes
       FROM reservations r
       JOIN spaces s ON s.id = r.space_id
+      LEFT JOIN users u ON u.id = r.user_id
       WHERE r.status = 'active'
     `;
 

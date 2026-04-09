@@ -21,7 +21,7 @@ Pegar en la url http://localhost:3000/api/auth/register
 Pegar en el json (EJEMPLO):
     {
         "name": "Juan",
-        "identifier": "juan@correo.com",
+        "email": "juan@correo.com",
         "password": "123456"
     }
 send
