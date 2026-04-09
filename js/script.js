@@ -313,7 +313,7 @@ async function createReservation(slotStart) {
       return;
     }
 
-    alert("Reserva creada correctamente");
+
 
     await loadCurrentUser();
     await loadReservations();
@@ -337,8 +337,6 @@ async function cancelReservation(reservationId) {
       alert(data.message || "No se pudo cancelar la reserva");
       return;
     }
-
-    alert("Reserva cancelada correctamente");
 
     await loadCurrentUser();
     await loadReservations();
@@ -391,9 +389,6 @@ function renderSlots() {
         });
 
         button.addEventListener("click", async () => {
-          const confirmDelete = confirm("¿Quieres cancelar esta reserva?");
-          if (!confirmDelete) return;
-
           await cancelReservation(reservation.id);
         });
       } else {
