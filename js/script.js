@@ -10,8 +10,14 @@ const slotsContainer = document.getElementById("slotsContainer");
 
 const connectBtn = document.getElementById("connectBtn");
 const connectDropdown = document.getElementById("connectDropdown");
+const connectMenu = document.getElementById("connectMenu");
 const openLoginBtn = document.getElementById("openLoginBtn");
 const openRegisterBtn = document.getElementById("openRegisterBtn");
+
+const loginBox = document.getElementById("loginBox");
+const loginIdentifier = document.getElementById("loginIdentifier");
+const loginPassword = document.getElementById("loginPassword");
+const loginRegisterLink = document.getElementById("loginRegisterLink");
 
 let currentDate = new Date();
 let selectedDate = null;
@@ -444,12 +450,26 @@ function updateConnectButton() {
   }
 }
 
+function showConnectMenu() {
+  connectMenu.classList.remove("hidden");
+  loginBox.classList.add("hidden");
+}
+
+function showLoginBox() {
+  connectMenu.classList.add("hidden");
+  loginBox.classList.remove("hidden");
+  setTimeout(() => {
+    loginIdentifier.focus();
+  }, 0);
+}
+
 function toggleConnectDropdown() {
   connectDropdown.classList.toggle("open");
 }
 
 function closeConnectDropdown() {
   connectDropdown.classList.remove("open");
+  showConnectMenu();
 }
 
 connectBtn.addEventListener("click", (event) => {
@@ -466,13 +486,54 @@ document.addEventListener("click", () => {
 });
 
 openLoginBtn.addEventListener("click", () => {
-  closeConnectDropdown();
-  alert("Ahora haremos el formulario de login");
+  showLoginBox();
 });
 
 openRegisterBtn.addEventListener("click", () => {
   closeConnectDropdown();
-  alert("Después haremos el formulario de registro");
+  alert("Ahora haremos la parte de registrar");
+});
+
+loginRegisterLink.addEventListener("click", () => {
+  closeConnectDropdown();
+  alert("Ahora haremos la parte de registrar");
+});
+
+loginBox.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const identifier = loginIdentifier.value.trim();
+  const password = loginPassword.value;
+
+  if (!identifier || !password) {
+    alert("Introduce usuario/email y contraseña");
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        identifier,
+        password
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || "No se pudo iniciar sesión");
+      return;
+    }
+
+    window.location.reload();
+  } catch (error) {
+    console.error(error);
+    alert("Error al iniciar sesión");
+  }
 });
 
 prevMonthBtn.addEventListener("click", async () => {
@@ -494,6 +555,7 @@ siteSelect.addEventListener("change", async () => {
 
 async function initApp() {
   updateConnectButton();
+  showConnectMenu();
   renderCalendar();
   await loadCalendarData();
 }

@@ -20,8 +20,33 @@
         <button id="connectBtn" class="admin-btn" type="button">Connect</button>
       
         <div id="connectDropdown" class="connect-dropdown">
-          <button id="openLoginBtn" type="button" class="dropdown-item">Login</button>
-          <button id="openRegisterBtn" type="button" class="dropdown-item">Registrar</button>
+          <div id="connectMenu">
+            <button id="openLoginBtn" type="button" class="dropdown-item">Login</button>
+            <button id="openRegisterBtn" type="button" class="dropdown-item">Registrar</button>
+          </div>
+      
+          <form id="loginBox" class="login-box hidden">
+            <input
+              id="loginIdentifier"
+              type="text"
+              placeholder="Usuario o email"
+              autocomplete="username"
+              required
+            />
+      
+            <input
+              id="loginPassword"
+              type="password"
+              placeholder="Contraseña"
+              autocomplete="current-password"
+              required
+            />
+      
+            <div class="login-box-actions">
+              <button id="loginSubmitBtn" type="submit" class="login-submit-btn">Login</button>
+              <button id="loginRegisterLink" type="button" class="login-register-link">Registrar</button>
+            </div>
+          </form>
         </div>
       </div>
     </header>
