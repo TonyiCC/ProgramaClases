@@ -1,3 +1,4 @@
-mensajes de error debajo de las lineas en rojo (No el cartel)
+corregi: que no se cierre la pestaña que se abre al darle a conectar, a menos que vuelva
+    clicar en el boton, porque si no se va lo escrito(más fácil que guardar lo escrito)
 que admin pueda ver usuarios y eliminarlos
 admin pueda añadir mas recintos y eliminarlos

@@ -540,17 +540,12 @@ function clearRegisterErrors() {
   hideError(registerFormError);
 }
 
-connectBtn.addEventListener("click", (event) => {
-  event.stopPropagation();
+connectBtn.addEventListener("click", () => {
   toggleConnectDropdown();
 });
 
 connectDropdown.addEventListener("click", (event) => {
   event.stopPropagation();
-});
-
-document.addEventListener("click", () => {
-  closeConnectDropdown();
 });
 
 openLoginBtn.addEventListener("click", () => {
