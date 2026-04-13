@@ -35,6 +35,8 @@ const registerEmailError = document.getElementById("registerEmailError");
 const registerPasswordError = document.getElementById("registerPasswordError");
 const registerFormError = document.getElementById("registerFormError");
 
+const usersBtn = document.getElementById("usersBtn");
+
 let currentDate = new Date();
 let selectedDate = null;
 
@@ -478,6 +480,15 @@ function updateConnectButton() {
   }
 
   updateConnectMenu();
+  updateUsersButton();
+}
+
+function updateUsersButton() {
+  if (currentUser && currentUser.role === "admin") {
+    usersBtn.classList.remove("hidden");
+  } else {
+    usersBtn.classList.add("hidden");
+  }
 }
 
 function showConnectMenu() {
@@ -562,6 +573,10 @@ loginRegisterLink.addEventListener("click", () => {
 
 registerLoginLink.addEventListener("click", () => {
   showLoginBox();
+});
+
+usersBtn.addEventListener("click", () => {
+  window.location.href = "Users_HTML.html";
 });
 
 loginBox.addEventListener("submit", async (event) => {

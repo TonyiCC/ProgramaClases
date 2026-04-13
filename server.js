@@ -6,7 +6,11 @@ const app = express();
 const PORT = 3000;
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname)));
+
+app.use("/css", express.static(path.join(__dirname, "css")));
+app.use("/js", express.static(path.join(__dirname, "js")));
+app.use("/assets", express.static(path.join(__dirname, "assets")));
+app.use(express.static(path.join(__dirname, "html")));
 
 //---------------------INICIO SESION ------------------------//
 const session = require("express-session");
@@ -68,6 +72,18 @@ async function ensureAdminUser() {
 function requireAuth(req, res, next) {
   if (!req.session.user) {
     return res.status(401).json({ message: "Debes iniciar sesión" });
+  }
+
+  next();
+}
+
+function requireAdmin(req, res, next) {
+  if (!req.session.user) {
+    return res.status(401).json({ message: "Debes iniciar sesión" });
+  }
+
+  if (req.session.user.role !== "admin") {
+    return res.status(403).json({ message: "No tienes permisos de administrador" });
   }
 
   next();
@@ -337,6 +353,29 @@ app.get("/api/my-reservations", requireAuth, async (req, res) => {
     res.status(500).json({ message: "Error al obtener tus reservas" });
   }
 });
+
+app.get("/api/users", requireAdmin, async (req, res) => {
+  try {
+    const rows = await all(
+      `
+      SELECT
+        id,
+        name,
+        email,
+        role,
+        created_at AS createdAt
+      FROM users
+      ORDER BY LOWER(name)
+      `
+    );
+
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al obtener usuarios" });
+  }
+});
+
 //---------------------------//
 
 

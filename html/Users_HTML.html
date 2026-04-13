@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Usuarios</title>
+  <link rel="stylesheet" href="/css/Users_CSS.css" />
+</head>
+<body>
+  <div class="users-page">
+    <header class="users-header">
+      <div>
+        <h1>Gestión de Usuarios</h1>
+        <p>Administración de usuarios registrados</p>
+      </div>
+
+      <a href="/" class="back-btn">Volver</a>
+    </header>
+
+    <main class="users-main">
+      <section class="users-card">
+        <div class="users-table-header">
+          <button id="sortByUserBtn" type="button" class="header-btn">Usuario</button>
+          <button id="sortByEmailBtn" type="button" class="header-btn">Correo</button>
+          <button id="sortByPasswordBtn" type="button" class="header-btn">Contraseña</button>
+        </div>
+
+        <div id="usersList" class="users-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/js/Users_Script.js"></script>
+</body>
+</html>
