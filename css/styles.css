@@ -242,6 +242,7 @@
     pointer-events: none;
   }
   
+  
   .day-number {
     font-weight: bold;
     font-size: 1rem;
@@ -402,4 +403,45 @@
     .day-status {
       font-size: 0.75rem;
     }
+
+  }
+  .connect-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .connect-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 170px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+    padding: 8px;
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 1000;
+  }
+  
+  
+  .connect-dropdown.open {
+    display: flex;
+  }
+  
+  .dropdown-item {
+    border: none;
+    background: #f8fbff;
+    border-radius: 10px;
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 0.95rem;
+    cursor: pointer;
+    width: 100%;
+  }
+  
+  .dropdown-item:hover {
+    background: #e8eefc;
   }

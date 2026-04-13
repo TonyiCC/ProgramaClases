@@ -8,6 +8,11 @@ const detailsTitle = document.getElementById("detailsTitle");
 const detailsSubtitle = document.getElementById("detailsSubtitle");
 const slotsContainer = document.getElementById("slotsContainer");
 
+const connectBtn = document.getElementById("connectBtn");
+const connectDropdown = document.getElementById("connectDropdown");
+const openLoginBtn = document.getElementById("openLoginBtn");
+const openRegisterBtn = document.getElementById("openRegisterBtn");
+
 let currentDate = new Date();
 let selectedDate = null;
 
@@ -73,22 +78,27 @@ function getReservationsForDay(site, isoDate) {
 
 function getReservationForSlot(site, isoDate, slotStart) {
   const dayReservations = getReservationsForDay(site, isoDate);
-  return dayReservations.find(r => r.slotStart === slotStart) || null;
+  return dayReservations.find((r) => r.slotStart === slotStart) || null;
 }
 
 function getReservedSlots(site, isoDate) {
-  return getReservationsForDay(site, isoDate).map(r => r.slotStart);
+  return getReservationsForDay(site, isoDate).map((r) => r.slotStart);
 }
 
 function isFullyReserved(site, isoDate) {
   const reserved = getReservedSlots(site, isoDate);
-  const allSlots = timeSlots.map(slot => slot.start);
-  return allSlots.length > 0 && allSlots.every(slot => reserved.includes(slot));
+  const allSlots = timeSlots.map((slot) => slot.start);
+  return allSlots.length > 0 && allSlots.every((slot) => reserved.includes(slot));
 }
 
 function isPartiallyReserved(site, isoDate) {
   const reserved = getReservedSlots(site, isoDate);
   return reserved.length > 0 && !isFullyReserved(site, isoDate);
+}
+
+function isOwnerReservation(reservation) {
+  if (!reservation || !currentUser) return false;
+  return currentUser.id === reservation.userId;
 }
 
 function canCancelReservation(reservation) {
@@ -109,7 +119,7 @@ function buildReservationsMap(rows) {
 
   map[currentSite] = {};
 
-  rows.forEach(reservation => {
+  rows.forEach((reservation) => {
     if (!map[currentSite][reservation.date]) {
       map[currentSite][reservation.date] = [];
     }
@@ -137,6 +147,7 @@ async function loadCurrentUser() {
   }
 
   currentUser = data.user;
+  updateConnectButton();
 }
 
 async function loadHolidays() {
@@ -147,7 +158,7 @@ async function loadHolidays() {
     throw new Error(data.message || "Error al cargar festivos");
   }
 
-  holidays = data.map(item => item.date);
+  holidays = data.map((item) => item.date);
 }
 
 async function loadReservations() {
@@ -313,8 +324,6 @@ async function createReservation(slotStart) {
       return;
     }
 
-
-
     await loadCurrentUser();
     await loadReservations();
     renderSlots();
@@ -356,7 +365,7 @@ function renderSlots() {
   const site = siteSelect.value;
   const isoDate = formatDateToISO(selectedDate);
 
-  timeSlots.forEach(slot => {
+  timeSlots.forEach((slot) => {
     const slotEl = document.createElement("div");
     slotEl.classList.add("slot");
 
@@ -409,11 +418,6 @@ function renderSlots() {
   });
 }
 
-function isOwnerReservation(reservation) {
-  if (!reservation || !currentUser) return false;
-  return currentUser.id === reservation.userId;
-}
-
 function getSlotText(slot, reservation) {
   if (reservation) {
     const name = reservation.reservedByName || "otra persona";
@@ -431,6 +435,45 @@ function getSlotText(slot, reservation) {
 
   return "Disponible";
 }
+
+function updateConnectButton() {
+  if (currentUser && currentUser.name) {
+    connectBtn.textContent = currentUser.name;
+  } else {
+    connectBtn.textContent = "Connect";
+  }
+}
+
+function toggleConnectDropdown() {
+  connectDropdown.classList.toggle("open");
+}
+
+function closeConnectDropdown() {
+  connectDropdown.classList.remove("open");
+}
+
+connectBtn.addEventListener("click", (event) => {
+  event.stopPropagation();
+  toggleConnectDropdown();
+});
+
+connectDropdown.addEventListener("click", (event) => {
+  event.stopPropagation();
+});
+
+document.addEventListener("click", () => {
+  closeConnectDropdown();
+});
+
+openLoginBtn.addEventListener("click", () => {
+  closeConnectDropdown();
+  alert("Ahora haremos el formulario de login");
+});
+
+openRegisterBtn.addEventListener("click", () => {
+  closeConnectDropdown();
+  alert("Después haremos el formulario de registro");
+});
 
 prevMonthBtn.addEventListener("click", async () => {
   currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
@@ -450,6 +493,7 @@ siteSelect.addEventListener("change", async () => {
 });
 
 async function initApp() {
+  updateConnectButton();
   renderCalendar();
   await loadCalendarData();
 }
