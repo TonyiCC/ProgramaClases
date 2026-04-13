@@ -18,6 +18,7 @@ const loginBox = document.getElementById("loginBox");
 const loginIdentifier = document.getElementById("loginIdentifier");
 const loginPassword = document.getElementById("loginPassword");
 const loginRegisterLink = document.getElementById("loginRegisterLink");
+const logoutBtn = document.getElementById("logoutBtn");
 
 let currentDate = new Date();
 let selectedDate = null;
@@ -448,6 +449,20 @@ function updateConnectButton() {
   } else {
     connectBtn.textContent = "Connect";
   }
+
+  updateConnectMenu();
+}
+
+function updateConnectMenu() {
+  if (currentUser) {
+    openLoginBtn.classList.add("hidden");
+    openRegisterBtn.classList.add("hidden");
+    logoutBtn.classList.remove("hidden");
+  } else {
+    openLoginBtn.classList.remove("hidden");
+    openRegisterBtn.classList.remove("hidden");
+    logoutBtn.classList.add("hidden");
+  }
 }
 
 function showConnectMenu() {
@@ -533,6 +548,26 @@ loginBox.addEventListener("submit", async (event) => {
   } catch (error) {
     console.error(error);
     alert("Error al iniciar sesión");
+  }
+});
+
+logoutBtn.addEventListener("click", async () => {
+  try {
+    const response = await fetch("/api/auth/logout", {
+      method: "POST"
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || "No se pudo cerrar sesión");
+      return;
+    }
+
+    window.location.reload();
+  } catch (error) {
+    console.error(error);
+    alert("Error al cerrar sesión");
   }
 });
 
