@@ -26,6 +26,15 @@ const registerEmail = document.getElementById("registerEmail");
 const registerPassword = document.getElementById("registerPassword");
 const registerLoginLink = document.getElementById("registerLoginLink");
 
+const loginIdentifierError = document.getElementById("loginIdentifierError");
+const loginPasswordError = document.getElementById("loginPasswordError");
+const loginFormError = document.getElementById("loginFormError");
+
+const registerNameError = document.getElementById("registerNameError");
+const registerEmailError = document.getElementById("registerEmailError");
+const registerPasswordError = document.getElementById("registerPasswordError");
+const registerFormError = document.getElementById("registerFormError");
+
 let currentDate = new Date();
 let selectedDate = null;
 
@@ -478,6 +487,7 @@ function showConnectMenu() {
 }
 
 function showLoginBox() {
+  clearLoginErrors();
   connectMenu.classList.add("hidden");
   loginBox.classList.remove("hidden");
   registerBox.classList.add("hidden");
@@ -488,6 +498,7 @@ function showLoginBox() {
 }
 
 function showRegisterBox() {
+  clearRegisterErrors();
   connectMenu.classList.add("hidden");
   loginBox.classList.add("hidden");
   registerBox.classList.remove("hidden");
@@ -504,6 +515,29 @@ function toggleConnectDropdown() {
 function closeConnectDropdown() {
   connectDropdown.classList.remove("open");
   showConnectMenu();
+}
+
+function hideError(element) {
+  element.textContent = "";
+  element.classList.add("hidden");
+}
+
+function showError(element, message) {
+  element.textContent = message;
+  element.classList.remove("hidden");
+}
+
+function clearLoginErrors() {
+  hideError(loginIdentifierError);
+  hideError(loginPasswordError);
+  hideError(loginFormError);
+}
+
+function clearRegisterErrors() {
+  hideError(registerNameError);
+  hideError(registerEmailError);
+  hideError(registerPasswordError);
+  hideError(registerFormError);
 }
 
 connectBtn.addEventListener("click", (event) => {
@@ -537,12 +571,18 @@ registerLoginLink.addEventListener("click", () => {
 
 loginBox.addEventListener("submit", async (event) => {
   event.preventDefault();
+  clearLoginErrors();
 
   const identifier = loginIdentifier.value.trim();
   const password = loginPassword.value;
 
-  if (!identifier || !password) {
-    alert("Introduce usuario/email y contraseña");
+  if (!identifier) {
+    showError(loginFormError, "Introduce tu usuario o correo");
+    return;
+  }
+
+  if (!password) {
+    showError(loginPasswordError, "Introduce tu contraseña");
     return;
   }
 
@@ -561,26 +601,41 @@ loginBox.addEventListener("submit", async (event) => {
     const data = await response.json();
 
     if (!response.ok) {
-      alert(data.message || "No se pudo iniciar sesión");
+      if (data.field === "password") {
+        showError(loginPasswordError, data.message);
+      } else {
+        showError(loginFormError, data.message || "No se pudo iniciar sesión");
+      }
       return;
     }
 
     window.location.reload();
   } catch (error) {
     console.error(error);
-    alert("Error al iniciar sesión");
+    showError(loginFormError, "Error al iniciar sesión");
   }
 });
 
 registerBox.addEventListener("submit", async (event) => {
   event.preventDefault();
+  clearRegisterErrors();
 
   const name = registerName.value.trim();
   const email = registerEmail.value.trim();
   const password = registerPassword.value;
 
-  if (!name || !email || !password) {
-    alert("Completa nombre, email y contraseña");
+  if (!name) {
+    showError(registerNameError, "Introduce un usuario");
+    return;
+  }
+
+  if (!email) {
+    showError(registerEmailError, "Introduce un correo");
+    return;
+  }
+
+  if (!password) {
+    showError(registerPasswordError, "Introduce una contraseña");
     return;
   }
 
@@ -600,14 +655,22 @@ registerBox.addEventListener("submit", async (event) => {
     const data = await response.json();
 
     if (!response.ok) {
-      alert(data.message || "No se pudo registrar");
+      if (data.field === "name") {
+        showError(registerNameError, data.message);
+      } else if (data.field === "email") {
+        showError(registerEmailError, data.message);
+      } else if (data.field === "password") {
+        showError(registerPasswordError, data.message);
+      } else {
+        showError(registerFormError, data.message || "No se pudo registrar");
+      }
       return;
     }
 
     window.location.reload();
   } catch (error) {
     console.error(error);
-    alert("Error al registrar el usuario");
+    showError(registerFormError, "Error al registrar el usuario");
   }
 });
 

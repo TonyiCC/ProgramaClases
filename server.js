@@ -75,41 +75,93 @@ function requireAuth(req, res, next) {
 
 app.post("/api/auth/register", async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password } = req.body || {};
 
-    if (!name || !email || !password) {
+    const cleanName = (name || "").trim();
+    const cleanEmail = (email || "").trim().toLowerCase();
+    const cleanPassword = password || "";
+
+    if (!cleanName) {
       return res.status(400).json({
-        message: "Nombre, email y contraseña son obligatorios"
+        field: "name",
+        message: "Introduce un usuario"
       });
     }
-
-    const cleanName = name.trim();
-    const cleanEmail = email.trim().toLowerCase();
 
     if (cleanName.length < 2) {
       return res.status(400).json({
-        message: "El nombre es demasiado corto"
+        field: "name",
+        message: "El usuario debe tener al menos 2 caracteres"
       });
     }
 
-    if (password.length < 6) {
+    if (!/^[a-zA-Z0-9._-]+$/.test(cleanName)) {
       return res.status(400).json({
+        field: "name",
+        message: "El usuario solo puede contener letras, números, punto, guion y guion bajo"
+      });
+    }
+
+    if (!cleanEmail) {
+      return res.status(400).json({
+        field: "email",
+        message: "Introduce un correo"
+      });
+    }
+
+    if (!cleanPassword) {
+      return res.status(400).json({
+        field: "password",
+        message: "Introduce una contraseña"
+      });
+    }
+
+    if (cleanPassword.length < 6) {
+      return res.status(400).json({
+        field: "password",
         message: "La contraseña debe tener al menos 6 caracteres"
       });
     }
 
-    const existingUser = await get(
+    if (/\s/.test(cleanPassword)) {
+      return res.status(400).json({
+        field: "password",
+        message: "La contraseña no puede contener espacios"
+      });
+    }
+
+    if (!/^[a-zA-Z0-9!@#$%^&*._-]+$/.test(cleanPassword)) {
+      return res.status(400).json({
+        field: "password",
+        message: "La contraseña contiene caracteres no permitidos"
+      });
+    }
+
+    const existingUserByName = await get(
+      `SELECT id FROM users WHERE LOWER(name) = LOWER(?)`,
+      [cleanName]
+    );
+
+    if (existingUserByName) {
+      return res.status(409).json({
+        field: "name",
+        message: "Ese usuario ya existe"
+      });
+    }
+
+    const existingUserByEmail = await get(
       `SELECT id FROM users WHERE email = ?`,
       [cleanEmail]
     );
 
-    if (existingUser) {
+    if (existingUserByEmail) {
       return res.status(409).json({
-        message: "Ya existe un usuario con ese email"
+        field: "email",
+        message: "Ese correo ya existe"
       });
     }
 
-    const hashedPassword = await hashPassword(password);
+    const hashedPassword = await hashPassword(cleanPassword);
 
     const result = await run(
       `
@@ -150,10 +202,19 @@ app.post("/api/auth/login", async (req, res) => {
     const { identifier, email, password } = req.body || {};
 
     const loginValue = (identifier || email || "").trim().toLowerCase();
+    const cleanPassword = password || "";
 
-    if (!loginValue || !password) {
+    if (!loginValue) {
       return res.status(400).json({
-        message: "Usuario/email y contraseña son obligatorios"
+        field: "form",
+        message: "Introduce tu usuario o correo"
+      });
+    }
+
+    if (!cleanPassword) {
+      return res.status(400).json({
+        field: "password",
+        message: "Introduce tu contraseña"
       });
     }
 
@@ -168,15 +229,17 @@ app.post("/api/auth/login", async (req, res) => {
 
     if (!user) {
       return res.status(401).json({
-        message: "Credenciales incorrectas"
+        field: "form",
+        message: "Ese usuario o correo no existe"
       });
     }
 
-    const isValidPassword = await verifyPassword(password, user.password);
+    const isValidPassword = await verifyPassword(cleanPassword, user.password);
 
     if (!isValidPassword) {
       return res.status(401).json({
-        message: "Credenciales incorrectas"
+        field: "password",
+        message: "La contraseña es incorrecta"
       });
     }
 

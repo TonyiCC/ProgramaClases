@@ -34,7 +34,8 @@
               autocomplete="username"
               required
             />
-        
+            <p id="loginIdentifierError" class="form-error hidden"></p>
+          
             <input
               id="loginPassword"
               type="password"
@@ -42,22 +43,26 @@
               autocomplete="current-password"
               required
             />
-        
+            <p id="loginPasswordError" class="form-error hidden"></p>
+          
             <div class="login-box-actions">
               <button type="submit" class="login-submit-btn">Login</button>
               <button id="loginRegisterLink" type="button" class="login-register-link">Registrar</button>
             </div>
+          
+            <p id="loginFormError" class="form-error hidden"></p>
           </form>
         
           <form id="registerBox" class="login-box hidden">
             <input
               id="registerName"
               type="text"
-              placeholder="Nombre"
-              autocomplete="name"
+              placeholder="Usuario"
+              autocomplete="username"
               required
             />
-        
+            <p id="registerNameError" class="form-error hidden"></p>
+          
             <input
               id="registerEmail"
               type="email"
@@ -65,7 +70,8 @@
               autocomplete="email"
               required
             />
-        
+            <p id="registerEmailError" class="form-error hidden"></p>
+          
             <input
               id="registerPassword"
               type="password"
@@ -73,11 +79,14 @@
               autocomplete="new-password"
               required
             />
-        
+            <p id="registerPasswordError" class="form-error hidden"></p>
+          
             <div class="login-box-actions">
               <button type="submit" class="login-submit-btn">Registrar</button>
               <button id="registerLoginLink" type="button" class="login-register-link">Login</button>
             </div>
+          
+            <p id="registerFormError" class="form-error hidden"></p>
           </form>
         </div>
       </div>

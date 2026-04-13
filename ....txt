@@ -1,2 +1,3 @@
-auto recargar pagina tras iniciar sesion
-meter interfaz para el login
+mensajes de error debajo de las lineas en rojo (No el cartel)
+que admin pueda ver usuarios y eliminarlos
+admin pueda añadir mas recintos y eliminarlos
