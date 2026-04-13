@@ -22,10 +22,10 @@
         <div id="connectDropdown" class="connect-dropdown">
           <div id="connectMenu">
             <button id="openLoginBtn" type="button" class="dropdown-item">Login</button>
-            <button id="openRegisterBtn" type="button" class="dropdown-item">SingUp</button>
-            <button id="logoutBtn" type="button" class="dropdown-item hidden">LogOut</button>
+            <button id="openRegisterBtn" type="button" class="dropdown-item">Registrar</button>
+            <button id="logoutBtn" type="button" class="dropdown-item hidden">Desloguear</button>
           </div>
-      
+        
           <form id="loginBox" class="login-box hidden">
             <input
               id="loginIdentifier"
@@ -34,7 +34,7 @@
               autocomplete="username"
               required
             />
-      
+        
             <input
               id="loginPassword"
               type="password"
@@ -42,10 +42,41 @@
               autocomplete="current-password"
               required
             />
-      
+        
             <div class="login-box-actions">
-              <button id="loginSubmitBtn" type="submit" class="login-submit-btn">Login</button>
+              <button type="submit" class="login-submit-btn">Login</button>
               <button id="loginRegisterLink" type="button" class="login-register-link">Registrar</button>
+            </div>
+          </form>
+        
+          <form id="registerBox" class="login-box hidden">
+            <input
+              id="registerName"
+              type="text"
+              placeholder="Nombre"
+              autocomplete="name"
+              required
+            />
+        
+            <input
+              id="registerEmail"
+              type="email"
+              placeholder="Email"
+              autocomplete="email"
+              required
+            />
+        
+            <input
+              id="registerPassword"
+              type="password"
+              placeholder="Contraseña"
+              autocomplete="new-password"
+              required
+            />
+        
+            <div class="login-box-actions">
+              <button type="submit" class="login-submit-btn">Registrar</button>
+              <button id="registerLoginLink" type="button" class="login-register-link">Login</button>
             </div>
           </form>
         </div>

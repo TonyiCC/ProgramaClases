@@ -13,12 +13,18 @@ const connectDropdown = document.getElementById("connectDropdown");
 const connectMenu = document.getElementById("connectMenu");
 const openLoginBtn = document.getElementById("openLoginBtn");
 const openRegisterBtn = document.getElementById("openRegisterBtn");
+const logoutBtn = document.getElementById("logoutBtn");
 
 const loginBox = document.getElementById("loginBox");
 const loginIdentifier = document.getElementById("loginIdentifier");
 const loginPassword = document.getElementById("loginPassword");
 const loginRegisterLink = document.getElementById("loginRegisterLink");
-const logoutBtn = document.getElementById("logoutBtn");
+
+const registerBox = document.getElementById("registerBox");
+const registerName = document.getElementById("registerName");
+const registerEmail = document.getElementById("registerEmail");
+const registerPassword = document.getElementById("registerPassword");
+const registerLoginLink = document.getElementById("registerLoginLink");
 
 let currentDate = new Date();
 let selectedDate = null;
@@ -443,16 +449,6 @@ function getSlotText(slot, reservation) {
   return "Disponible";
 }
 
-function updateConnectButton() {
-  if (currentUser && currentUser.name) {
-    connectBtn.textContent = currentUser.name;
-  } else {
-    connectBtn.textContent = "Connect";
-  }
-
-  updateConnectMenu();
-}
-
 function updateConnectMenu() {
   if (currentUser) {
     openLoginBtn.classList.add("hidden");
@@ -465,16 +461,39 @@ function updateConnectMenu() {
   }
 }
 
+function updateConnectButton() {
+  if (currentUser && currentUser.name) {
+    connectBtn.textContent = currentUser.name;
+  } else {
+    connectBtn.textContent = "Connect";
+  }
+
+  updateConnectMenu();
+}
+
 function showConnectMenu() {
   connectMenu.classList.remove("hidden");
   loginBox.classList.add("hidden");
+  registerBox.classList.add("hidden");
 }
 
 function showLoginBox() {
   connectMenu.classList.add("hidden");
   loginBox.classList.remove("hidden");
+  registerBox.classList.add("hidden");
+
   setTimeout(() => {
     loginIdentifier.focus();
+  }, 0);
+}
+
+function showRegisterBox() {
+  connectMenu.classList.add("hidden");
+  loginBox.classList.add("hidden");
+  registerBox.classList.remove("hidden");
+
+  setTimeout(() => {
+    registerName.focus();
   }, 0);
 }
 
@@ -505,13 +524,15 @@ openLoginBtn.addEventListener("click", () => {
 });
 
 openRegisterBtn.addEventListener("click", () => {
-  closeConnectDropdown();
-  alert("Ahora haremos la parte de registrar");
+  showRegisterBox();
 });
 
 loginRegisterLink.addEventListener("click", () => {
-  closeConnectDropdown();
-  alert("Ahora haremos la parte de registrar");
+  showRegisterBox();
+});
+
+registerLoginLink.addEventListener("click", () => {
+  showLoginBox();
 });
 
 loginBox.addEventListener("submit", async (event) => {
@@ -548,6 +569,45 @@ loginBox.addEventListener("submit", async (event) => {
   } catch (error) {
     console.error(error);
     alert("Error al iniciar sesión");
+  }
+});
+
+registerBox.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const name = registerName.value.trim();
+  const email = registerEmail.value.trim();
+  const password = registerPassword.value;
+
+  if (!name || !email || !password) {
+    alert("Completa nombre, email y contraseña");
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name,
+        email,
+        password
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || "No se pudo registrar");
+      return;
+    }
+
+    window.location.reload();
+  } catch (error) {
+    console.error(error);
+    alert("Error al registrar el usuario");
   }
 });
 
