@@ -1,2 +1,3 @@
-
-admin pueda añadir mas recintos y eliminarlos
+corregir editor de espacios
+que el espacio nuevo se añada despues
+cambiar orden de carga ordenando arrastrando con el ratón, de arriba a abajo
