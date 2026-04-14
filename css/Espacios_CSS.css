@@ -72,10 +72,11 @@
   
   .spaces-table-header {
     display: grid;
-    grid-template-columns: 1fr 70px;
+    grid-template-columns: 1fr 120px;
     gap: 12px;
     margin-bottom: 16px;
   }
+  
   
   .header-btn {
     border: 1px solid var(--border);
@@ -86,6 +87,7 @@
     font-size: 1rem;
     font-weight: bold;
     cursor: pointer;
+    text-align: center;
   }
   
   .header-btn:hover {
@@ -100,9 +102,9 @@
   
   .space-row {
     display: grid;
-    grid-template-columns: 1fr 70px;
+    grid-template-columns: 1fr 120px;
     gap: 12px;
-    align-items: stretch;
+    align-items: start;
   }
   
   .space-field {
@@ -170,8 +172,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: 46px;
   }
   
+  .space-row.temp-row .space-actions {
+    align-items: flex-start;
+    justify-content: stretch;
+  }
+
+  .space-row.temp-row .space-save-btn {
+    width: 100%;
+  }
+
   .space-save-btn {
     border: none;
     background: #16a34a;
@@ -185,8 +197,8 @@
   
   .space-save-btn:hover {
     background: #15803d;
-  }  
-  
+  }
+
   .space-delete-btn {
     border: none;
     background: #dc2626;
