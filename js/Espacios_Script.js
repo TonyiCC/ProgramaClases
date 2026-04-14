@@ -25,9 +25,7 @@ async function loadSpaces() {
 
 function renderSpaces() {
   const visibleSpaces = sortByNameActive
-    ? [...spaces].sort((a, b) =>
-        (a.name || "").localeCompare(b.name || "", "es", { sensitivity: "base" })
-      )
+    ? [...spaces].sort((a, b) => (a.name || "").localeCompare(b.name || "", "es", { sensitivity: "base" }))
     : [...spaces];
 
   if (!visibleSpaces.length) {
@@ -36,44 +34,71 @@ function renderSpaces() {
   }
 
   spacesList.innerHTML = visibleSpaces
-    .map((space) => {
-      return `
-        <div class="space-row" data-space-id="${space.id}">
-          <div class="space-field">${escapeHtml(space.name || "")}</div>
-          <div class="space-actions">
-            <button
-              type="button"
-              class="space-delete-btn"
-              title="Eliminar espacio"
-              aria-label="Eliminar espacio"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v8h-2V9zm4 0h2v8h-2V9zM7 9h2v8H7V9zm1 12c-1.1 0-2-.9-2-2V8h12v11c0 1.1-.9 2-2 2H8z"/>
-              </svg>
-            </button>
-          </div>
+    .map((space) => `
+      <div class="space-row" data-space-id="${space.id}">
+        <div class="space-field">${escapeHtml(space.name || "")}</div>
+        <div class="space-media">
+          <button
+            type="button"
+            class="image-btn ${space.imageUrl ? "has-image" : ""}"
+            title="Asignar imagen"
+            aria-label="Asignar imagen"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 19V5a2 2 0 0 0-2-2H5C3.9 3 3 3.9 3 5v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 11.5 11 14.5l3.5-4.5L19 16H5l3.5-4.5z"/>
+            </svg>
+          </button>
         </div>
-      `;
-    })
+        <div class="space-actions">
+          <button type="button" class="space-delete-btn" title="Eliminar espacio" aria-label="Eliminar espacio">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v8h-2V9zm4 0h2v8h-2V9zM7 9h2v8H7V9zm1 12c-1.1 0-2-.9-2-2V8h12v11c0 1.1-.9 2-2 2H8z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    `)
     .join("");
 
-  attachDeleteEvents();
+  attachRowEvents();
 }
 
-function attachDeleteEvents() {
-  const rows = document.querySelectorAll(".space-row");
-
-  rows.forEach((row) => {
+function attachRowEvents() {
+  document.querySelectorAll(".space-row").forEach((row) => {
+    const spaceId = row.dataset.spaceId;
+    const imageBtn = row.querySelector(".image-btn");
     const deleteBtn = row.querySelector(".space-delete-btn");
 
-    deleteBtn.addEventListener("click", async () => {
-      const spaceId = row.dataset.spaceId;
+    imageBtn.addEventListener("click", async () => {
+      const targetSpace = spaces.find((space) => String(space.id) === String(spaceId));
+      const currentValue = targetSpace?.imageUrl || "";
+      const nextValue = prompt("Introduce la URL o ruta de la imagen del espacio", currentValue);
+
+      if (nextValue === null) return;
 
       try {
         const response = await fetch(`/api/admin/spaces/${spaceId}`, {
-          method: "DELETE"
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ imageUrl: nextValue.trim() })
         });
 
+        const data = await response.json();
+        if (!response.ok) {
+          alert(data.message || "No se pudo actualizar la imagen");
+          return;
+        }
+
+        await loadSpaces();
+      } catch (error) {
+        console.error(error);
+        alert("Error al actualizar la imagen");
+      }
+    });
+
+    deleteBtn.addEventListener("click", async () => {
+      try {
+        const response = await fetch(`/api/admin/spaces/${spaceId}`, { method: "DELETE" });
         const data = await response.json();
 
         if (!response.ok) {
@@ -92,35 +117,26 @@ function attachDeleteEvents() {
 
 function addTemporarySpaceRow() {
   const existingTempRow = document.querySelector(".space-row.temp-row");
-
   if (existingTempRow) {
-    const input = existingTempRow.querySelector(".space-input");
-    if (input) input.focus();
+    existingTempRow.querySelector(".space-input")?.focus();
     return;
   }
 
   const emptyMessage = spacesList.querySelector(".spaces-message");
-  if (emptyMessage) {
-    spacesList.innerHTML = "";
-  }
+  if (emptyMessage) spacesList.innerHTML = "";
 
   const tempRow = document.createElement("div");
   tempRow.className = "space-row temp-row";
-
   tempRow.innerHTML = `
-    <div class="space-create-row">
-      <input
-        type="text"
-        class="space-input"
-        placeholder="Escribe el nombre del nuevo espacio"
-      />
+    <div>
+      <input type="text" class="space-input" placeholder="Escribe el nombre del nuevo espacio" />
       <p class="space-error"></p>
     </div>
+    <div class="space-media"></div>
     <div class="space-actions">
       <button type="button" class="space-save-btn">Guardar</button>
     </div>
   `;
-
   spacesList.appendChild(tempRow);
 
   const input = tempRow.querySelector(".space-input");
@@ -134,14 +150,11 @@ function addTemporarySpaceRow() {
     try {
       const response = await fetch("/api/admin/spaces", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name })
       });
 
       const data = await response.json();
-
       if (!response.ok) {
         errorEl.textContent = data.message || "No se pudo crear el espacio";
         return;
@@ -155,7 +168,7 @@ function addTemporarySpaceRow() {
     }
   });
 
-  input.addEventListener("keydown", async (event) => {
+  input.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
       saveBtn.click();
@@ -179,8 +192,6 @@ sortByNameBtn.addEventListener("click", () => {
   renderSpaces();
 });
 
-addSpaceBtn.addEventListener("click", () => {
-  addTemporarySpaceRow();
-});
+addSpaceBtn.addEventListener("click", addTemporarySpaceRow);
 
 loadSpaces();

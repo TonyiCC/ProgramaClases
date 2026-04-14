@@ -3,92 +3,63 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reserva de Espacios</title>
+  <title>Espacios</title>
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
-  <div class="app">
+  <div class="app-shell">
     <header class="topbar">
-      <div class="brand">
-        <img src="/assets/logo.png" alt="Logo de la aplicación" class="logo" />
-        <div>
-          <h1>Reserva de Espacios</h1>
-          <p>Consulta disponibilidad y selecciona una franja horaria</p>
-        </div>
+      <div class="brand-block">
+        <h1>Espacios</h1>
+        <p>Selecciona un espacio para abrir su calendario</p>
       </div>
+
       <div class="topbar-actions">
         <button id="usersBtn" class="users-btn hidden" type="button">USERS</button>
-      
+        <button id="editSpacesBtn" class="edit-spaces-btn hidden" type="button">
+          Editar espacios
+        </button>
+
         <div class="connect-wrapper">
-          <button id="connectBtn" class="admin-btn" type="button">Connect</button>
-      
+          <button id="connectBtn" class="action-btn primary" type="button">Connect</button>
+
           <div id="connectDropdown" class="connect-dropdown">
             <div id="connectMenu">
               <button id="openLoginBtn" type="button" class="dropdown-item">Login</button>
-              <button id="openRegisterBtn" type="button" class="dropdown-item">SingUp</button>
-              <button id="logoutBtn" type="button" class="dropdown-item hidden">SingOut</button>
+              <button id="openRegisterBtn" type="button" class="dropdown-item">Sign Up</button>
+              <button id="logoutBtn" type="button" class="dropdown-item hidden">Sign Out</button>
             </div>
-      
-            <form id="loginBox" class="login-box hidden">
-              <input
-                id="loginIdentifier"
-                type="text"
-                placeholder="Usuario o email"
-                autocomplete="username"
-                required
-              />
+
+            <form id="loginBox" class="auth-box hidden">
+              <input id="loginIdentifier" type="text" placeholder="Usuario o email" autocomplete="username" required />
               <p id="loginIdentifierError" class="form-error hidden"></p>
-      
-              <input
-                id="loginPassword"
-                type="password"
-                placeholder="Contraseña"
-                autocomplete="current-password"
-                required
-              />
+
+              <input id="loginPassword" type="password" placeholder="Contraseña" autocomplete="current-password" required />
               <p id="loginPasswordError" class="form-error hidden"></p>
-      
-              <div class="login-box-actions">
-                <button type="submit" class="login-submit-btn">Login</button>
-                <button id="loginRegisterLink" type="button" class="login-register-link">SingUp</button>
+
+              <div class="auth-box-actions">
+                <button type="submit" class="submit-btn">Login</button>
+                <button id="loginRegisterLink" type="button" class="switch-link">Sign Up</button>
               </div>
-      
+
               <p id="loginFormError" class="form-error hidden"></p>
             </form>
-      
-            <form id="registerBox" class="login-box hidden">
-              <input
-                id="registerName"
-                type="text"
-                placeholder="Usuario"
-                autocomplete="username"
-                required
-              />
+
+            <form id="registerBox" class="auth-box hidden">
+              <input id="registerName" type="text" placeholder="Usuario" autocomplete="username" required />
               <p id="registerNameError" class="form-error hidden"></p>
-      
-              <input
-                id="registerEmail"
-                type="email"
-                placeholder="Email"
-                autocomplete="email"
-                required
-              />
+
+              <input id="registerEmail" type="email" placeholder="Email" autocomplete="email" required />
               <p id="registerEmailError" class="form-error hidden"></p>
-      
-              <input
-                id="registerPassword"
-                type="password"
-                placeholder="Contraseña"
-                autocomplete="new-password"
-                required
-              />
+
+              <input id="registerPassword" type="password" placeholder="Contraseña" autocomplete="new-password" required />
               <p id="registerPasswordError" class="form-error hidden"></p>
-      
-              <div class="login-box-actions">
-                <button type="submit" class="login-submit-btn">Registrar</button>
-                <button id="registerLoginLink" type="button" class="login-register-link">Login</button>
+
+              <div class="auth-box-actions">
+                <button type="submit" class="submit-btn">Registrar</button>
+                <button id="registerLoginLink" type="button" class="switch-link">Login</button>
               </div>
-      
+
               <p id="registerFormError" class="form-error hidden"></p>
             </form>
           </div>
@@ -96,67 +67,8 @@
       </div>
     </header>
 
-    <main class="layout">
-      <section class="calendar-panel card">
-        <div class="toolbar">
-          <div class="field-group">
-            <label for="siteSelect">Espacio</label>
-          
-            <div class="space-select-row">
-              <select id="siteSelect"></select>
-          
-              <button id="editSpacesBtn" class="edit-spaces-btn hidden" type="button">
-                Edit
-              </button>
-            </div>
-          </div>
-
-          <div class="month-nav">
-            <button id="prevMonth" type="button">◀</button>
-            <h2 id="monthTitle"></h2>
-            <button id="nextMonth" type="button">▶</button>
-          </div>
-        </div>
-
-        <div class="legend">
-            <div class="legend-item">
-                <span class="legend-color available"></span>
-                <span>Libre</span>
-            </div>
-            <div class="legend-item">
-                <span class="legend-color partial"></span>
-                <span>Reserva parcial</span>
-            </div>
-            <div class="legend-item">
-                <span class="legend-color reserved"></span>
-                <span>Reservado completo</span>
-            </div>
-            <div class="legend-item">
-                <span class="legend-color disabled"></span>
-                <span>Festivo / fin de semana</span>
-            </div>
-        </div>
-
-        <div class="weekdays">
-          <div>Lun</div>
-          <div>Mar</div>
-          <div>Mié</div>
-          <div>Jue</div>
-          <div>Vie</div>
-          <div>Sáb</div>
-          <div>Dom</div>
-        </div>
-
-        <div id="calendarGrid" class="calendar-grid"></div>
-      </section>
-
-      <aside class="details-panel card">
-        <h3 id="detailsTitle">Selecciona un día</h3>
-        <p id="detailsSubtitle">Aquí aparecerán las franjas horarias disponibles.</p>
-
-        <div id="slotsContainer" class="slots"></div>
-
-      </aside>
+    <main class="menu-panel">
+      <div id="spacesGrid" class="spaces-grid"></div>
     </main>
   </div>
 

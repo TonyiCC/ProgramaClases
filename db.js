@@ -44,9 +44,19 @@ function exec(sql) {
   });
 }
 
+async function ensureSpacesColumns() {
+  const columns = await all(`PRAGMA table_info(spaces)`);
+  const names = columns.map((column) => column.name);
+
+  if (!names.includes("image_url")) {
+    await run(`ALTER TABLE spaces ADD COLUMN image_url TEXT`);
+  }
+}
+
 async function initDatabase() {
   const schemaSql = fs.readFileSync(schemaPath, "utf8");
   await exec(schemaSql);
+  await ensureSpacesColumns();
 
   const spacesTable = await get(`
     SELECT name

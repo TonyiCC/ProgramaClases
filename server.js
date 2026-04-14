@@ -284,6 +284,7 @@ app.get("/api/admin/spaces", requireAdmin, async (req, res) => {
         code,
         name,
         description,
+        image_url AS imageUrl,
         active,
         created_at AS createdAt
       FROM spaces
@@ -356,15 +357,15 @@ app.post("/api/admin/spaces", requireAdmin, async (req, res) => {
 
     const result = await run(
       `
-      INSERT INTO spaces (code, name, description, active)
-      VALUES (?, ?, ?, 1)
+      INSERT INTO spaces (code, name, description, image_url, active)
+      VALUES (?, ?, ?, ?, 1)
       `,
-      [finalCode, cleanName, null]
+      [finalCode, cleanName, null, null]
     );
 
     const newSpace = await get(
       `
-      SELECT id, code, name, description, active, created_at AS createdAt
+      SELECT id, code, name, description, image_url AS imageUrl, active, created_at AS createdAt
       FROM spaces
       WHERE id = ?
       `,
@@ -763,10 +764,10 @@ app.get("/api/test", (req, res) => {
 app.get("/api/spaces", async (req, res) => {
   try {
     const rows = await all(`
-      SELECT id, code, name, description, active
+      SELECT id, code, name, description, image_url AS imageUrl, active
       FROM spaces
       WHERE active = 1
-      ORDER BY name
+      ORDER BY id
     `);
 
     res.json(rows);

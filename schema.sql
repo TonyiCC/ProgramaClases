@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS spaces (
   code TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
   description TEXT,
+  image_url TEXT,
   active INTEGER NOT NULL DEFAULT 1,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

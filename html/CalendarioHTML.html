@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calendario de espacio</title>
+  <link rel="stylesheet" href="/css/Calendario_CSS.css" />
+</head>
+<body>
+  <div class="calendar-app">
+    <header class="topbar">
+      <div class="brand-block">
+        <h1 id="spaceTitle">Calendario</h1>
+        <p id="spaceSubtitle">Consulta disponibilidad y reserva una franja horaria</p>
+      </div>
+
+      <div class="connect-wrapper">
+        <button id="connectBtn" class="action-btn primary" type="button">Connect</button>
+
+        <div id="connectDropdown" class="connect-dropdown">
+          <div id="connectMenu">
+            <button id="openLoginBtn" type="button" class="dropdown-item">Login</button>
+            <button id="openRegisterBtn" type="button" class="dropdown-item">Sign Up</button>
+            <button id="logoutBtn" type="button" class="dropdown-item hidden">Sign Out</button>
+          </div>
+
+          <form id="loginBox" class="auth-box hidden">
+            <input id="loginIdentifier" type="text" placeholder="Usuario o email" autocomplete="username" required />
+            <p id="loginIdentifierError" class="form-error hidden"></p>
+
+            <input id="loginPassword" type="password" placeholder="Contraseña" autocomplete="current-password" required />
+            <p id="loginPasswordError" class="form-error hidden"></p>
+
+            <div class="auth-box-actions">
+              <button type="submit" class="submit-btn">Login</button>
+              <button id="loginRegisterLink" type="button" class="switch-link">Sign Up</button>
+            </div>
+
+            <p id="loginFormError" class="form-error hidden"></p>
+          </form>
+
+          <form id="registerBox" class="auth-box hidden">
+            <input id="registerName" type="text" placeholder="Usuario" autocomplete="username" required />
+            <p id="registerNameError" class="form-error hidden"></p>
+
+            <input id="registerEmail" type="email" placeholder="Email" autocomplete="email" required />
+            <p id="registerEmailError" class="form-error hidden"></p>
+
+            <input id="registerPassword" type="password" placeholder="Contraseña" autocomplete="new-password" required />
+            <p id="registerPasswordError" class="form-error hidden"></p>
+
+            <div class="auth-box-actions">
+              <button type="submit" class="submit-btn">Registrar</button>
+              <button id="registerLoginLink" type="button" class="switch-link">Login</button>
+            </div>
+
+            <p id="registerFormError" class="form-error hidden"></p>
+          </form>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="calendar-panel card">
+        <div class="toolbar">
+          <div class="field-group">
+            <label>Espacio</label>
+            <button id="backBtn" class="back-btn" type="button">Volver</button>
+          </div>
+
+          <div class="month-nav">
+            <button id="prevMonth" type="button">◀</button>
+            <h2 id="monthTitle"></h2>
+            <button id="nextMonth" type="button">▶</button>
+          </div>
+        </div>
+
+        <div class="legend">
+          <div class="legend-item"><span class="legend-color available"></span><span>Libre</span></div>
+          <div class="legend-item"><span class="legend-color partial"></span><span>Reserva parcial</span></div>
+          <div class="legend-item"><span class="legend-color reserved"></span><span>Reservado completo</span></div>
+          <div class="legend-item"><span class="legend-color disabled"></span><span>Festivo / fin de semana</span></div>
+        </div>
+
+        <div class="weekdays">
+          <div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div><div>Dom</div>
+        </div>
+
+        <div id="calendarGrid" class="calendar-grid"></div>
+      </section>
+
+      <aside class="details-panel card">
+        <h3 id="detailsTitle">Selecciona un día</h3>
+        <p id="detailsSubtitle">Aquí aparecerán las franjas horarias disponibles.</p>
+        <div id="slotsContainer" class="slots"></div>
+      </aside>
+    </main>
+  </div>
+
+  <script src="/js/Calendario_Script.js"></script>
+</body>
+</html>

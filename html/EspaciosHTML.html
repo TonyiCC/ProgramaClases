@@ -11,24 +11,25 @@
     <header class="spaces-header">
       <div>
         <h1>Gestión de espacios</h1>
-        <p>Listado de espacios registrados</p>
+        <p>Añade, elimina y asigna una imagen a cada espacio</p>
       </div>
 
       <a href="/" class="back-btn">Volver</a>
     </header>
 
     <main class="spaces-main">
-        <section class="spaces-card">
-            <div class="spaces-table-header">
-                <button id="sortByNameBtn" type="button" class="header-btn">Nombre</button>
-                <div class="header-btn no-click">Acciones</div>
-            </div>
-      
-          <div id="spacesList" class="spaces-list"></div>
-      
-          <button id="addSpaceBtn" type="button" class="add-space-btn">+</button>
-        </section>
-      </main>
+      <section class="spaces-card">
+        <div class="spaces-table-header">
+          <button id="sortByNameBtn" type="button" class="header-btn">Nombre</button>
+          <div class="header-btn no-click">Imagen</div>
+          <div class="header-btn no-click">Acciones</div>
+        </div>
+
+        <div id="spacesList" class="spaces-list"></div>
+
+        <button id="addSpaceBtn" type="button" class="add-space-btn">+</button>
+      </section>
+    </main>
   </div>
 
   <script src="/js/Espacios_Script.js"></script>
