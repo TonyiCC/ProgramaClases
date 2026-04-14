@@ -297,6 +297,138 @@ app.get("/api/admin/spaces", requireAdmin, async (req, res) => {
   }
 });
 
+app.post("/api/admin/spaces", requireAdmin, async (req, res) => {
+  try {
+    const { name } = req.body || {};
+    const cleanName = (name || "").trim();
+
+    if (!cleanName) {
+      return res.status(400).json({
+        field: "name",
+        message: "Introduce un nombre para el espacio"
+      });
+    }
+
+    if (cleanName.length < 2) {
+      return res.status(400).json({
+        field: "name",
+        message: "El nombre debe tener al menos 2 caracteres"
+      });
+    }
+
+    const existingByName = await get(
+      `SELECT id FROM spaces WHERE LOWER(name) = LOWER(?)`,
+      [cleanName]
+    );
+
+    if (existingByName) {
+      return res.status(409).json({
+        field: "name",
+        message: "Ese espacio ya existe"
+      });
+    }
+
+    let baseCode = cleanName
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+    if (!baseCode) {
+      baseCode = "espacio";
+    }
+
+    let finalCode = baseCode;
+    let counter = 2;
+
+    while (true) {
+      const existingByCode = await get(
+        `SELECT id FROM spaces WHERE code = ?`,
+        [finalCode]
+      );
+
+      if (!existingByCode) break;
+
+      finalCode = `${baseCode}-${counter}`;
+      counter++;
+    }
+
+    const result = await run(
+      `
+      INSERT INTO spaces (code, name, description, active)
+      VALUES (?, ?, ?, 1)
+      `,
+      [finalCode, cleanName, null]
+    );
+
+    const newSpace = await get(
+      `
+      SELECT id, code, name, description, active, created_at AS createdAt
+      FROM spaces
+      WHERE id = ?
+      `,
+      [result.lastID]
+    );
+
+    res.status(201).json({
+      message: "Espacio creado correctamente",
+      space: newSpace
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al crear el espacio" });
+  }
+});
+
+app.delete("/api/admin/spaces/:id", requireAdmin, async (req, res) => {
+  try {
+    const spaceId = Number(req.params.id);
+
+    if (!spaceId) {
+      return res.status(400).json({
+        message: "ID de espacio no válido"
+      });
+    }
+
+    const space = await get(
+      `
+      SELECT id, name
+      FROM spaces
+      WHERE id = ?
+      `,
+      [spaceId]
+    );
+
+    if (!space) {
+      return res.status(404).json({
+        message: "Espacio no encontrado"
+      });
+    }
+
+    const linkedReservations = await get(
+      `SELECT COUNT(*) AS total FROM reservations WHERE space_id = ?`,
+      [spaceId]
+    );
+
+    if (linkedReservations.total > 0) {
+      return res.status(400).json({
+        message: "No se puede eliminar un espacio que tiene reservas asociadas"
+      });
+    }
+
+    await run(`DELETE FROM spaces WHERE id = ?`, [spaceId]);
+
+    res.json({
+      message: "Espacio eliminado correctamente",
+      space
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al eliminar el espacio" });
+  }
+});
+
 app.get("/api/my-reservations", requireAuth, async (req, res) => {
   try {
     const rows = await all(
@@ -865,3 +997,4 @@ initDatabase()
   .catch((error) => {
     console.error("Error inicializando la base de datos:", error);
   });
+  
