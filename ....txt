@@ -1,2 +1,14 @@
 
-cambiar orden de carga ordenando arrastrando con el ratón, de arriba a abajo
+Reestrucurar proyecto entero:
+    Un menu donde se vean los espacios. Un recuadro con una imagen y el nombre debajo de la imagen, y al pulsar en el recuadro, te lleve a ese calendario.
+    Que el menu sea horizontalmente de 3 recuadros.
+    Que ocupe lo mismo que es espacio del calendario sumado a la selecciond de dias 
+    (es decir, que ocupe el mismo espacio que todo lo que hay en el espacio del calendario)
+
+Implica: Mover toda la seccion del calendario a otro ventana nueva 
+Poner el boton editar espacios en el menú
+Poner el boton de iniciar sesion en el menu
+Poner boto de editar usuarios en el menu
+
+En el menú tiene que poner donde ahora poner Reserva de espacios ---> Espaciso y a la derecha , el boton edit, que solo ve el admin
+Donde ahora está Espacio, con el desplegable, estará el boton volver.
