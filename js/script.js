@@ -36,7 +36,6 @@ const registerPasswordError = document.getElementById("registerPasswordError");
 const registerFormError = document.getElementById("registerFormError");
 
 const usersBtn = document.getElementById("usersBtn");
-
 const editSpacesBtn = document.getElementById("editSpacesBtn");
 
 let currentDate = new Date();
@@ -45,6 +44,7 @@ let selectedDate = null;
 let currentUser = null;
 let holidays = [];
 let reservations = {};
+let spaces = [];
 let isLoading = false;
 
 const timeSlots = [
@@ -164,6 +164,38 @@ function buildReservationsMap(rows) {
   return map;
 }
 
+function renderSpacesSelect() {
+  const previousValue = siteSelect.value;
+
+  siteSelect.innerHTML = "";
+
+  if (!spaces.length) {
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "No hay espacios disponibles";
+    siteSelect.appendChild(option);
+    siteSelect.disabled = true;
+    return;
+  }
+
+  siteSelect.disabled = false;
+
+  spaces.forEach((space) => {
+    const option = document.createElement("option");
+    option.value = space.code;
+    option.textContent = space.name;
+    siteSelect.appendChild(option);
+  });
+
+  const existsPreviousValue = spaces.some((space) => space.code === previousValue);
+
+  if (existsPreviousValue) {
+    siteSelect.value = previousValue;
+  } else {
+    siteSelect.value = spaces[0].code;
+  }
+}
+
 async function loadCurrentUser() {
   const response = await fetch("/api/auth/me");
   const data = await response.json();
@@ -174,6 +206,18 @@ async function loadCurrentUser() {
 
   currentUser = data.user;
   updateConnectButton();
+}
+
+async function loadSpaces() {
+  const response = await fetch("/api/spaces");
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Error al cargar los espacios");
+  }
+
+  spaces = data;
+  renderSpacesSelect();
 }
 
 async function loadHolidays() {
@@ -190,6 +234,11 @@ async function loadHolidays() {
 async function loadReservations() {
   const site = siteSelect.value;
   const month = formatMonthToISO(currentDate);
+
+  if (!site) {
+    reservations = {};
+    return;
+  }
 
   const response = await fetch(
     `/api/reservations?site=${encodeURIComponent(site)}&month=${encodeURIComponent(month)}`
@@ -209,6 +258,7 @@ async function loadCalendarData() {
     isLoading = true;
 
     await loadCurrentUser();
+    await loadSpaces();
 
     if (holidays.length === 0) {
       await loadHolidays();
@@ -230,6 +280,14 @@ async function loadCalendarData() {
 
 function renderCalendar() {
   calendarGrid.innerHTML = "";
+
+  if (!siteSelect.value) {
+    monthTitle.textContent = currentDate.toLocaleDateString("es-ES", {
+      month: "long",
+      year: "numeric"
+    });
+    return;
+  }
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -474,18 +532,6 @@ function updateConnectMenu() {
   }
 }
 
-function updateConnectButton() {
-  if (currentUser && currentUser.name) {
-    connectBtn.textContent = currentUser.name;
-  } else {
-    connectBtn.textContent = "Connect";
-  }
-
-  updateConnectMenu();
-  updateUsersButton();
-  updateEditSpacesButton();
-}
-
 function updateUsersButton() {
   if (currentUser && currentUser.role === "admin") {
     usersBtn.classList.remove("hidden");
@@ -500,6 +546,18 @@ function updateEditSpacesButton() {
   } else {
     editSpacesBtn.classList.add("hidden");
   }
+}
+
+function updateConnectButton() {
+  if (currentUser && currentUser.name) {
+    connectBtn.textContent = currentUser.name;
+  } else {
+    connectBtn.textContent = "Connect";
+  }
+
+  updateConnectMenu();
+  updateUsersButton();
+  updateEditSpacesButton();
 }
 
 function showConnectMenu() {
