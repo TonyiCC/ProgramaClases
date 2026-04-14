@@ -276,6 +276,27 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
+app.get("/api/admin/spaces", requireAdmin, async (req, res) => {
+  try {
+    const rows = await all(`
+      SELECT
+        id,
+        code,
+        name,
+        description,
+        active,
+        created_at AS createdAt
+      FROM spaces
+      ORDER BY LOWER(name)
+    `);
+
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al obtener los espacios" });
+  }
+});
+
 app.get("/api/my-reservations", requireAuth, async (req, res) => {
   try {
     const rows = await all(

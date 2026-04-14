@@ -1,0 +1,128 @@
+:root {
+    --bg: #f3f6fb;
+    --card: #ffffff;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --border: #dbe3ef;
+    --shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+    --blue: #2563eb;
+    --blue-dark: #1d4ed8;
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: linear-gradient(180deg, #edf3ff 0%, var(--bg) 100%);
+    color: var(--text);
+  }
+  
+  .spaces-page {
+    min-height: 100vh;
+    padding: 24px;
+  }
+  
+  .spaces-header {
+    max-width: 1000px;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  
+  .spaces-header h1 {
+    margin: 0 0 6px;
+    font-size: 2rem;
+  }
+  
+  .spaces-header p {
+    margin: 0;
+    color: var(--muted);
+  }
+  
+  .back-btn {
+    text-decoration: none;
+    background: var(--blue);
+    color: white;
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-weight: bold;
+  }
+  
+  .back-btn:hover {
+    background: var(--blue-dark);
+  }
+  
+  .spaces-main {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  
+  .spaces-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 20px;
+  }
+  
+  .spaces-table-header {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .header-btn {
+    border: 1px solid var(--border);
+    background: #f8fbff;
+    border-radius: 14px;
+    padding: 12px 14px;
+    text-align: left;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .header-btn:hover {
+    background: #e8eefc;
+  }
+  
+  .spaces-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .space-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .space-field {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 14px;
+    background: white;
+    font-size: 0.95rem;
+  }
+  
+  .spaces-message {
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: #f8fbff;
+    color: var(--muted);
+  }
+  
+  @media (max-width: 1000px) {
+    .spaces-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
