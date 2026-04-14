@@ -1,2 +1,2 @@
-eliminar usuarios
+
 admin pueda añadir mas recintos y eliminarlos

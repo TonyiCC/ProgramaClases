@@ -517,6 +517,61 @@ app.put("/api/users/:id", requireAdmin, async (req, res) => {
     res.status(500).json({ message: "Error al actualizar el usuario" });
   }
 });
+
+app.delete("/api/users/:id", requireAdmin, async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+
+    if (!userId) {
+      return res.status(400).json({
+        message: "ID de usuario no válido"
+      });
+    }
+
+    const targetUser = await get(
+      `
+      SELECT id, name, email, role
+      FROM users
+      WHERE id = ?
+      `,
+      [userId]
+    );
+
+    if (!targetUser) {
+      return res.status(404).json({
+        message: "Usuario no encontrado"
+      });
+    }
+
+    if (targetUser.id === req.session.user.id) {
+      return res.status(400).json({
+        message: "No puedes eliminar tu propio usuario"
+      });
+    }
+
+    if (targetUser.role === "admin") {
+      const adminCountRow = await get(
+        `SELECT COUNT(*) AS total FROM users WHERE role = 'admin'`
+      );
+
+      if (adminCountRow.total <= 1) {
+        return res.status(400).json({
+          message: "No puedes eliminar el último administrador"
+        });
+      }
+    }
+
+    await run(`DELETE FROM users WHERE id = ?`, [userId]);
+
+    res.json({
+      message: "Usuario eliminado correctamente",
+      user: targetUser
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al eliminar el usuario" });
+  }
+});
 //---------------------------//
 
 

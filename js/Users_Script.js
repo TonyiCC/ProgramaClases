@@ -60,22 +60,30 @@ function renderUsers() {
           <p class="field-error error-password"></p>
         </div>
 
-        <div class="user-field">
-          <button type="button" class="save-btn">Guardar</button>
+        <div class="user-field actions-cell">
+          <div class="actions-buttons">
+            <button type="button" class="save-btn">Guardar</button>
+            <button type="button" class="delete-btn" title="Eliminar usuario" aria-label="Eliminar usuario">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v8h-2V9zm4 0h2v8h-2V9zM7 9h2v8H7V9zm1 12c-1.1 0-2-.9-2-2V8h12v11c0 1.1-.9 2-2 2H8z"/>
+              </svg>
+            </button>
+          </div>
           <p class="field-error error-form"></p>
         </div>
       </div>
     `;
   }).join("");
 
-  attachSaveEvents();
+  attachRowEvents();
 }
 
-function attachSaveEvents() {
+function attachRowEvents() {
   const rows = document.querySelectorAll(".user-row");
 
   rows.forEach((row) => {
     const saveBtn = row.querySelector(".save-btn");
+    const deleteBtn = row.querySelector(".delete-btn");
 
     saveBtn.addEventListener("click", async () => {
       const userId = row.dataset.userId;
@@ -123,6 +131,35 @@ function attachSaveEvents() {
       } catch (error) {
         console.error(error);
         errorForm.textContent = "Error al guardar";
+      }
+    });
+
+    deleteBtn.addEventListener("click", async () => {
+      const userId = row.dataset.userId;
+
+      const errorName = row.querySelector(".error-name");
+      const errorEmail = row.querySelector(".error-email");
+      const errorPassword = row.querySelector(".error-password");
+      const errorForm = row.querySelector(".error-form");
+
+      clearRowErrors(errorName, errorEmail, errorPassword, errorForm);
+
+      try {
+        const response = await fetch(`/api/users/${userId}`, {
+          method: "DELETE"
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          errorForm.textContent = data.message || "No se pudo eliminar";
+          return;
+        }
+
+        await loadUsers();
+      } catch (error) {
+        console.error(error);
+        errorForm.textContent = "Error al eliminar";
       }
     });
   });

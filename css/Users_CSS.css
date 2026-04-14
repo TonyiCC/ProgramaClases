@@ -179,3 +179,54 @@ body {
     align-items: flex-start;
   }
 }
+
+.actions-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.actions-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.save-btn {
+  border: none;
+  background: #16a34a;
+  color: white;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-weight: bold;
+  cursor: pointer;
+  flex: 1;
+}
+
+.save-btn:hover {
+  background: #15803d;
+}
+
+.delete-btn {
+  border: none;
+  background: #dc2626;
+  color: white;
+  border-radius: 12px;
+  width: 46px;
+  min-width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.delete-btn:hover {
+  background: #b91c1c;
+}
+
+.delete-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
