@@ -376,6 +376,147 @@ app.get("/api/users", requireAdmin, async (req, res) => {
   }
 });
 
+app.put("/api/users/:id", requireAdmin, async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    const { name, email, password } = req.body || {};
+
+    const cleanName = (name || "").trim();
+    const cleanEmail = (email || "").trim().toLowerCase();
+    const cleanPassword = password || "";
+
+    if (!userId) {
+      return res.status(400).json({
+        field: "form",
+        message: "ID de usuario no válido"
+      });
+    }
+
+    if (!cleanName) {
+      return res.status(400).json({
+        field: "name",
+        message: "Introduce un usuario"
+      });
+    }
+
+    if (cleanName.length < 2) {
+      return res.status(400).json({
+        field: "name",
+        message: "El usuario debe tener al menos 2 caracteres"
+      });
+    }
+
+    if (!/^[a-zA-Z0-9._-]+$/.test(cleanName)) {
+      return res.status(400).json({
+        field: "name",
+        message: "El usuario solo puede contener letras, números, punto, guion y guion bajo"
+      });
+    }
+
+    if (!cleanEmail) {
+      return res.status(400).json({
+        field: "email",
+        message: "Introduce un correo"
+      });
+    }
+
+    const existingUser = await get(
+      `SELECT id, role FROM users WHERE id = ?`,
+      [userId]
+    );
+
+    if (!existingUser) {
+      return res.status(404).json({
+        field: "form",
+        message: "Usuario no encontrado"
+      });
+    }
+
+    const existingUserByName = await get(
+      `SELECT id FROM users WHERE LOWER(name) = LOWER(?) AND id != ?`,
+      [cleanName, userId]
+    );
+
+    if (existingUserByName) {
+      return res.status(409).json({
+        field: "name",
+        message: "Ese usuario ya existe"
+      });
+    }
+
+    const existingUserByEmail = await get(
+      `SELECT id FROM users WHERE email = ? AND id != ?`,
+      [cleanEmail, userId]
+    );
+
+    if (existingUserByEmail) {
+      return res.status(409).json({
+        field: "email",
+        message: "Ese correo ya existe"
+      });
+    }
+
+    if (cleanPassword) {
+      if (cleanPassword.length < 6) {
+        return res.status(400).json({
+          field: "password",
+          message: "La contraseña debe tener al menos 6 caracteres"
+        });
+      }
+
+      if (/\s/.test(cleanPassword)) {
+        return res.status(400).json({
+          field: "password",
+          message: "La contraseña no puede contener espacios"
+        });
+      }
+
+      if (!/^[a-zA-Z0-9!@#$%^&*._-]+$/.test(cleanPassword)) {
+        return res.status(400).json({
+          field: "password",
+          message: "La contraseña contiene caracteres no permitidos"
+        });
+      }
+
+      const hashedPassword = await hashPassword(cleanPassword);
+
+      await run(
+        `
+        UPDATE users
+        SET name = ?, email = ?, password = ?
+        WHERE id = ?
+        `,
+        [cleanName, cleanEmail, hashedPassword, userId]
+      );
+    } else {
+      await run(
+        `
+        UPDATE users
+        SET name = ?, email = ?
+        WHERE id = ?
+        `,
+        [cleanName, cleanEmail, userId]
+      );
+    }
+
+    const updatedUser = await get(
+      `
+      SELECT id, name, email, role, created_at AS createdAt
+      FROM users
+      WHERE id = ?
+      `,
+      [userId]
+    );
+
+    res.json({
+      message: "Usuario actualizado correctamente",
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al actualizar el usuario" });
+  }
+});
 //---------------------------//
 
 
