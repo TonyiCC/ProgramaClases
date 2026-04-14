@@ -538,3 +538,28 @@
   .users-btn:hover {
     background: #b91c1c;
   }
+
+  .space-select-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .space-select-row select {
+    flex: 1;
+  }
+  
+  .edit-spaces-btn {
+    border: none;
+    background: #111827;
+    color: white;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  
+  .edit-spaces-btn:hover {
+    background: #1f2937;
+  }

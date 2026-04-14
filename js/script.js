@@ -37,6 +37,8 @@ const registerFormError = document.getElementById("registerFormError");
 
 const usersBtn = document.getElementById("usersBtn");
 
+const editSpacesBtn = document.getElementById("editSpacesBtn");
+
 let currentDate = new Date();
 let selectedDate = null;
 
@@ -481,6 +483,7 @@ function updateConnectButton() {
 
   updateConnectMenu();
   updateUsersButton();
+  updateEditSpacesButton();
 }
 
 function updateUsersButton() {
@@ -488,6 +491,14 @@ function updateUsersButton() {
     usersBtn.classList.remove("hidden");
   } else {
     usersBtn.classList.add("hidden");
+  }
+}
+
+function updateEditSpacesButton() {
+  if (currentUser && currentUser.role === "admin") {
+    editSpacesBtn.classList.remove("hidden");
+  } else {
+    editSpacesBtn.classList.add("hidden");
   }
 }
 
@@ -577,6 +588,10 @@ registerLoginLink.addEventListener("click", () => {
 
 usersBtn.addEventListener("click", () => {
   window.location.href = "Users_HTML.html";
+});
+
+editSpacesBtn.addEventListener("click", () => {
+  window.location.href = "EspaciosHTML.html";
 });
 
 loginBox.addEventListener("submit", async (event) => {

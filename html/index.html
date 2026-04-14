@@ -101,11 +101,18 @@
         <div class="toolbar">
           <div class="field-group">
             <label for="siteSelect">Espacio</label>
-            <select id="siteSelect">
-              <option value="salon-actos">Salón de actos</option>
-              <option value="polideportivo">Polideportivo</option>
-              <option value="aula-multiusos">Aula multiusos</option>
-            </select>
+          
+            <div class="space-select-row">
+              <select id="siteSelect">
+                <option value="salon-actos">Salón de actos</option>
+                <option value="polideportivo">Polideportivo</option>
+                <option value="aula-multiusos">Aula multiusos</option>
+              </select>
+          
+              <button id="editSpacesBtn" class="edit-spaces-btn hidden" type="button">
+                Edit
+              </button>
+            </div>
           </div>
 
           <div class="month-nav">
