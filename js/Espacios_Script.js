@@ -3,6 +3,7 @@ const sortByNameBtn = document.getElementById("sortByNameBtn");
 const addSpaceBtn = document.getElementById("addSpaceBtn");
 
 let spaces = [];
+let sortByNameActive = false;
 
 async function loadSpaces() {
   try {
@@ -23,16 +24,18 @@ async function loadSpaces() {
 }
 
 function renderSpaces() {
-  const sortedSpaces = [...spaces].sort((a, b) =>
-    (a.name || "").localeCompare(b.name || "", "es", { sensitivity: "base" })
-  );
+  const visibleSpaces = sortByNameActive
+    ? [...spaces].sort((a, b) =>
+        (a.name || "").localeCompare(b.name || "", "es", { sensitivity: "base" })
+      )
+    : [...spaces];
 
-  if (!sortedSpaces.length) {
+  if (!visibleSpaces.length) {
     spacesList.innerHTML = `<div class="spaces-message">No hay espacios registrados</div>`;
     return;
   }
 
-  spacesList.innerHTML = sortedSpaces
+  spacesList.innerHTML = visibleSpaces
     .map((space) => {
       return `
         <div class="space-row" data-space-id="${space.id}">
@@ -144,6 +147,7 @@ function addTemporarySpaceRow() {
         return;
       }
 
+      sortByNameActive = false;
       await loadSpaces();
     } catch (error) {
       console.error(error);
@@ -171,6 +175,7 @@ function escapeHtml(text) {
 }
 
 sortByNameBtn.addEventListener("click", () => {
+  sortByNameActive = !sortByNameActive;
   renderSpaces();
 });
 

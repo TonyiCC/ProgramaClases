@@ -1,3 +1,2 @@
 
-que el espacio nuevo se añada despues
 cambiar orden de carga ordenando arrastrando con el ratón, de arriba a abajo

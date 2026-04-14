@@ -287,7 +287,7 @@ app.get("/api/admin/spaces", requireAdmin, async (req, res) => {
         active,
         created_at AS createdAt
       FROM spaces
-      ORDER BY LOWER(name)
+      ORDER BY id
     `);
 
     res.json(rows);
