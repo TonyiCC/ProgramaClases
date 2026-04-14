@@ -288,13 +288,74 @@ app.get("/api/admin/spaces", requireAdmin, async (req, res) => {
         active,
         created_at AS createdAt
       FROM spaces
-      ORDER BY id
+      ORDER BY LOWER(name)
     `);
 
     res.json(rows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error al obtener los espacios" });
+  }
+});
+
+app.put("/api/admin/spaces/:id", requireAdmin, async (req, res) => {
+  try {
+    const spaceId = Number(req.params.id);
+    const { imageUrl } = req.body || {};
+
+    if (!spaceId) {
+      return res.status(400).json({
+        message: "ID de espacio no válido"
+      });
+    }
+
+    const space = await get(
+      `
+      SELECT id, name, code, image_url AS imageUrl
+      FROM spaces
+      WHERE id = ?
+      `,
+      [spaceId]
+    );
+
+    if (!space) {
+      return res.status(404).json({
+        message: "Espacio no encontrado"
+      });
+    }
+
+    await run(
+      `
+      UPDATE spaces
+      SET image_url = ?
+      WHERE id = ?
+      `,
+      [imageUrl || null, spaceId]
+    );
+
+    const updatedSpace = await get(
+      `
+      SELECT
+        id,
+        code,
+        name,
+        description,
+        image_url AS imageUrl,
+        active,
+        created_at AS createdAt
+      FROM spaces
+      WHERE id = ?
+      `,
+      [spaceId]
+    );
+
+    res.json({
+      message: "Imagen actualizada correctamente",
+      space: updatedSpace
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al actualizar la imagen" });
   }
 });
 

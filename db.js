@@ -56,7 +56,6 @@ async function ensureSpacesColumns() {
 async function initDatabase() {
   const schemaSql = fs.readFileSync(schemaPath, "utf8");
   await exec(schemaSql);
-  await ensureSpacesColumns();
 
   const spacesTable = await get(`
     SELECT name
@@ -67,6 +66,8 @@ async function initDatabase() {
   if (!spacesTable) {
     throw new Error("No se ha creado la tabla spaces");
   }
+
+  await ensureSpacesColumns();
 
   const countRow = await get("SELECT COUNT(*) AS total FROM spaces");
 
