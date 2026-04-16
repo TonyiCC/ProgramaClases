@@ -7,6 +7,32 @@ npm install sqlite3
 npm install express-session
 npm start
 
+Instalar thunder client en extensiones VsCode
+
+Ejecutable 
+
+npm install --save-dev electron@32
+npm install --save-dev @electron-forge/cli @electron-forge/maker-zip
+npm run make  (hacer ejecutable)
+
+out/
+  TuApp-darwin-x64/
+  make/
+    zip/
+      darwin/
+        TuApp-darwin-x64-<version>.zip
+
+Ese .zip contendrá tu aplicación de escritorio para Mac.
+
+
+
+
+
+
+
+
+---YA NO USAR---
+
 
 Instalar thunder client en extensiones VsCode
 
