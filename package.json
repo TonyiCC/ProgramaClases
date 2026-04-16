@@ -1,15 +1,21 @@
 {
   "name": "programaclases",
   "version": "1.0.0",
-  "description": "",
+  "description": "Aplicación de reservas de espacios para centros educativos",
   "main": "electron-main.js",
   "scripts": {
     "start": "electron .",
     "package": "electron-forge package",
     "make": "electron-forge make"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "reservas",
+    "espacios",
+    "electron",
+    "express",
+    "sqlite"
+  ],
+  "author": "TonyiCC",
   "license": "ISC",
   "dependencies": {
     "express": "^5.2.1",
@@ -18,6 +24,7 @@
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.11.1",
+    "@electron-forge/maker-squirrel": "^7.11.1",
     "@electron-forge/maker-zip": "^7.11.1",
     "electron": "^32.3.3"
   },
@@ -28,6 +35,12 @@
           "name": "@electron-forge/maker-zip",
           "platforms": [
             "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "platforms": [
+            "win32"
           ]
         }
       ]
