@@ -2,7 +2,7 @@
   "name": "programaclases",
   "version": "1.0.0",
   "description": "Aplicación de reservas de espacios para centros educativos",
-  "main": "electron-main.js",
+  "main": "js/electron-main.js",
   "scripts": {
     "start": "electron .",
     "package": "electron-forge package",

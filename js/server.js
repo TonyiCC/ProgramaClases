@@ -49,11 +49,11 @@ const upload = multer({
 
 
 app.use(express.json());
-app.use("/css", express.static(path.join(__dirname, "css")));
-app.use("/js", express.static(path.join(__dirname, "js")));
-app.use("/assets", express.static(path.join(__dirname, "assets")));
+app.use("/css", express.static(path.join(__dirname, "..", "css")));
+app.use("/js", express.static(path.join(__dirname, "..", "js")));
+app.use("/assets", express.static(path.join(__dirname, "..", "assets")));
 app.use("/space-images", express.static(spaceImagesDir));
-app.use(express.static(path.join(__dirname, "html")));
+app.use(express.static(path.join(__dirname, "..", "html")));
 
 //---------------------INICIO SESION ------------------------//
 const session = require("express-session");

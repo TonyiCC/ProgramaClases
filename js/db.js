@@ -2,9 +2,9 @@ const path = require("path");
 const fs = require("fs");
 const sqlite3 = require("sqlite3").verbose();
 
-const dbPath = path.join(__dirname, "reservas.db");
-const schemaPath = path.join(__dirname, "schema.sql");
-const seedPath = path.join(__dirname, "seed.sql");
+const dbPath = path.join(__dirname, "..", "reservas.db");
+const schemaPath = path.join(__dirname, "..", "schema.sql");
+const seedPath = path.join(__dirname, "..", "seed.sql");
 
 const db = new sqlite3.Database(dbPath);
 

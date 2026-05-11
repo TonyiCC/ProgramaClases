@@ -8,6 +8,8 @@ npm install express-session
 npm install multer
 npm start
 
+arrancar el server a mano: node js/server.js
+
 Instalar thunder client en extensiones VsCode
 
 Ejecutable 
