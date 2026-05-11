@@ -5,14 +5,17 @@ npm init -y
 npm install express
 npm install sqlite3
 npm install express-session
+npm install multer
 npm start
 
 Instalar thunder client en extensiones VsCode
 
 Ejecutable 
 
-npm install --save-dev electron@32
-npm install --save-dev @electron-forge/cli @electron-forge/maker-zip
+(npm install --save-dev electron@32)
+(npm install --save-dev @electron-forge/cli @electron-forge/maker-zip)
+
+npm isntall
 npm run make  (hacer ejecutable)
 
 out/

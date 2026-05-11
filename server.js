@@ -1,15 +1,58 @@
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
+const multer = require("multer");
 const { all, get, run, initDatabase } = require("./db");
 
 const app = express();
 const PORT = 3000;
 
-app.use(express.json());
+const appStoragePath = process.env.APP_STORAGE_PATH || __dirname;
+const spaceImagesDir = path.join(appStoragePath, "space-images");
 
+fs.mkdirSync(spaceImagesDir, { recursive: true });
+
+function deleteManagedSpaceImage(imageUrl) {
+  if (!imageUrl || !imageUrl.startsWith("/space-images/")) return;
+
+  const filename = path.basename(imageUrl);
+  const filePath = path.join(spaceImagesDir, filename);
+
+  if (fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+  }
+}
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => {
+      cb(null, spaceImagesDir);
+    },
+    filename: (_req, file, cb) => {
+      const extension = path.extname(file.originalname || "").toLowerCase() || ".png";
+      const safeName = `space-${Date.now()}-${Math.round(Math.random() * 1e9)}${extension}`;
+      cb(null, safeName);
+    }
+  }),
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype && file.mimetype.startsWith("image/")) {
+      cb(null, true);
+      return;
+    }
+
+    cb(new Error("Solo se permiten archivos de imagen"));
+  },
+  limits: {
+    fileSize: 5 * 1024 * 1024
+  }
+});
+
+
+app.use(express.json());
 app.use("/css", express.static(path.join(__dirname, "css")));
 app.use("/js", express.static(path.join(__dirname, "js")));
 app.use("/assets", express.static(path.join(__dirname, "assets")));
+app.use("/space-images", express.static(spaceImagesDir));
 app.use(express.static(path.join(__dirname, "html")));
 
 //---------------------INICIO SESION ------------------------//
@@ -88,6 +131,88 @@ function requireAdmin(req, res, next) {
 
   next();
 }
+
+app.post("/api/admin/spaces/:id/image", requireAdmin, (req, res) => {
+  upload.single("image")(req, res, async (uploadError) => {
+    try {
+      if (uploadError) {
+        return res.status(400).json({
+          message: uploadError.message || "No se pudo subir la imagen"
+        });
+      }
+
+      const spaceId = Number(req.params.id);
+
+      if (!spaceId) {
+        return res.status(400).json({
+          message: "ID de espacio no válido"
+        });
+      }
+
+      const space = await get(
+        `
+        SELECT id, name, image_url AS imageUrl
+        FROM spaces
+        WHERE id = ?
+        `,
+        [spaceId]
+      );
+
+      if (!space) {
+        if (req.file?.path && fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+        }
+
+        return res.status(404).json({
+          message: "Espacio no encontrado"
+        });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({
+          message: "Debes seleccionar una imagen"
+        });
+      }
+
+      deleteManagedSpaceImage(space.imageUrl);
+
+      const imageUrl = `/space-images/${req.file.filename}`;
+
+      await run(
+        `
+        UPDATE spaces
+        SET image_url = ?
+        WHERE id = ?
+        `,
+        [imageUrl, spaceId]
+      );
+
+      const updatedSpace = await get(
+        `
+        SELECT
+          id,
+          code,
+          name,
+          description,
+          image_url AS imageUrl,
+          active,
+          created_at AS createdAt
+        FROM spaces
+        WHERE id = ?
+        `,
+        [spaceId]
+      );
+
+      res.json({
+        message: "Imagen actualizada correctamente",
+        space: updatedSpace
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Error al actualizar la imagen" });
+    }
+  });
+});
 
 app.post("/api/auth/register", async (req, res) => {
   try {
@@ -455,7 +580,7 @@ app.delete("/api/admin/spaces/:id", requireAdmin, async (req, res) => {
 
     const space = await get(
       `
-      SELECT id, name
+      SELECT id, name, image_url AS imageUrl
       FROM spaces
       WHERE id = ?
       `,
@@ -478,7 +603,7 @@ app.delete("/api/admin/spaces/:id", requireAdmin, async (req, res) => {
         message: "No se puede eliminar un espacio que tiene reservas asociadas"
       });
     }
-
+    deleteManagedSpaceImage(space.imageUrl);
     await run(`DELETE FROM spaces WHERE id = ?`, [spaceId]);
 
     res.json({

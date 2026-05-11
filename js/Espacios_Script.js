@@ -69,31 +69,40 @@ function attachRowEvents() {
     const imageBtn = row.querySelector(".image-btn");
     const deleteBtn = row.querySelector(".space-delete-btn");
 
-    imageBtn.addEventListener("click", async () => {
-      const targetSpace = spaces.find((space) => String(space.id) === String(spaceId));
-      const currentValue = targetSpace?.imageUrl || "";
-      const nextValue = prompt("Introduce la URL o ruta de la imagen del espacio", currentValue);
-
-      if (nextValue === null) return;
-
-      try {
-        const response = await fetch(`/api/admin/spaces/${spaceId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ imageUrl: nextValue.trim() })
-        });
-
-        const data = await response.json();
-        if (!response.ok) {
-          alert(data.message || "No se pudo actualizar la imagen");
-          return;
+    imageBtn.addEventListener("click", () => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+    
+      input.addEventListener("change", async () => {
+        const file = input.files?.[0];
+    
+        if (!file) return;
+    
+        const formData = new FormData();
+        formData.append("image", file);
+    
+        try {
+          const response = await fetch(`/api/admin/spaces/${spaceId}/image`, {
+            method: "POST",
+            body: formData
+          });
+    
+          const data = await response.json();
+    
+          if (!response.ok) {
+            alert(data.message || "No se pudo actualizar la imagen");
+            return;
+          }
+    
+          await loadSpaces();
+        } catch (error) {
+          console.error(error);
+          alert("Error al actualizar la imagen");
         }
-
-        await loadSpaces();
-      } catch (error) {
-        console.error(error);
-        alert("Error al actualizar la imagen");
-      }
+      });
+    
+      input.click();
     });
 
     deleteBtn.addEventListener("click", async () => {

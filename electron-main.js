@@ -29,8 +29,14 @@ function waitForServer(url, timeoutMs = 15000) {
 }
 
 function startServer() {
+  const userDataPath = app.getPath("userData");
+
   serverProcess = fork(path.join(__dirname, "server.js"), [], {
     stdio: "inherit",
+    env: {
+      ...process.env,
+      APP_STORAGE_PATH: userDataPath,
+    }
   });
 }
 
