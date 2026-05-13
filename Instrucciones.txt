@@ -8,7 +8,7 @@ npm install express-session
 npm install multer
 
 
-
+------Web------
 
 arrancar el server a mano: node js/server.js
 
