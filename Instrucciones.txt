@@ -1,3 +1,5 @@
+------Dependencias------
+
 Intalar Node.js
 
 En la carpeta del archivo
@@ -11,6 +13,7 @@ npm install multer
 ------Web------
 
 arrancar el server a mano: node js/server.js
+http://localhost:3000/
 
 ------Ejecutable------
 
@@ -23,6 +26,7 @@ Instalar thunder client en extensiones VsCode
 
 npm isntall
 npm run make  
+npm start
 
 out/
   TuApp-darwin-x64/
