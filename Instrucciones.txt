@@ -6,19 +6,23 @@ npm install express
 npm install sqlite3
 npm install express-session
 npm install multer
-npm start
+
+
+
 
 arrancar el server a mano: node js/server.js
 
-Instalar thunder client en extensiones VsCode
+------Ejecutable------
 
-Ejecutable 
+Instalar thunder client en extensiones VsCode
 
 (npm install --save-dev electron@32)
 (npm install --save-dev @electron-forge/cli @electron-forge/maker-zip)
 
+-hacer ejecutable-
+
 npm isntall
-npm run make  (hacer ejecutable)
+npm run make  
 
 out/
   TuApp-darwin-x64/
@@ -27,7 +31,20 @@ out/
       darwin/
         TuApp-darwin-x64-<version>.zip
 
-Ese .zip contendrá tu aplicación de escritorio para Mac.
+Ese .zip contendrá la aplicación de escritorio.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
